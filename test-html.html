@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Clock">
+    <link rel="manifest" href="manifest.json">
+    <title>Activity Clock - PWA Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            transition: background-color 0.5s;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+        }
+        
+        .photos-section {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .photo-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 4px solid #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: white;
+        }
+        
+        .bg-night .photo {
+            border-color: #94a3b8;
+        }
+        
+        .photo-name {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+        
+        .test-label {
+            position: absolute;
+            top: -2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fbbf24;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        
+        .datetime-row {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 3rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 3rem;
+        }
+        
+        .time {
+            font-size: 10rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+        
+        .activity {
+            font-size: 5rem;
+            font-weight: bold;
+            padding: 2rem 3rem;
+            border-radius: 2rem;
+            background: white;
+            border: 4px solid #1a1a1a;
+        }
+        
+        /* Background colors */
+        .bg-morning { background-color: #fef3c7; color: #1a1a1a; }
+        .bg-afternoon { background-color: #dbeafe; color: #1a1a1a; }
+        .bg-evening { background-color: #e9d5ff; color: #1a1a1a; }
+        .bg-night { background-color: #334155; color: white; }
+        
+        .bg-night .activity {
+            background-color: #475569;
+            border-color: #94a3b8;
+            color: white;
+        }
+        
+        .bg-night .photo-name {
+            color: #e2e8f0;
+        }
+        
+        .bg-night .test-label {
+            background: #f59e0b;
+        }
+        
+        /* Responsive for smaller screens */
+        @media (max-width: 768px) {
+            .photo {
+                width: 150px;
+                height: 150px;
+                font-size: 3rem;
+            }
+            .photo-name { font-size: 1.5rem; }
+            .photos-section { gap: 1rem; }
+            .datetime-row { 
+                font-size: 2.5rem; 
+                gap: 1.5rem;
+                flex-wrap: wrap;
+            }
+            .time { font-size: 6rem; }
+            .activity { font-size: 3.5rem; padding: 1.5rem 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="photos-section">
+            <div class="test-label">PWA TEST - PLACEHOLDER DATA</div>
+            <div class="photo-card">
+                <div class="photo">I</div>
+                <div class="photo-name">Ilona</div>
+            </div>
+            <div class="photo-card">
+                <div class="photo">H</div>
+                <div class="photo-name">Hal</div>
+            </div>
+        </div>
+        
+        <div class="datetime-row">
+            <span id="day"></span>
+            <span class="time" id="time"></span>
+            <span id="period"></span>
+        </div>
+        <div class="activity" id="activity"></div>
+    </div>
+
+    <script>
+        // Hardcoded test data - no external files needed
+        const ACTIVITY_SCHEDULE = {
+            breakfast: { start: 6, end: 9, label: "Breakfast Time" },
+            morning: { start: 9, end: 12, label: "Morning Time" },
+            lunch: { start: 12, end: 13, label: "Lunch Time" },
+            afternoon: { start: 13, end: 17, label: "Afternoon Time" },
+            dinner: { start: 17, end: 19, label: "Dinner Time" },
+            evening: { start: 19, end: 22, label: "Evening Time" },
+            sleep: { start: 22, end: 6, label: "Sleep Time" }
+        };
+        
+        function getActivity(hours) {
+            if (hours >= ACTIVITY_SCHEDULE.breakfast.start && hours < ACTIVITY_SCHEDULE.breakfast.end) {
+                return ACTIVITY_SCHEDULE.breakfast.label;
+            }
+            if (hours >= ACTIVITY_SCHEDULE.morning.start && hours < ACTIVITY_SCHEDULE.morning.end) {
+                return ACTIVITY_SCHEDULE.morning.label;
+            }
+            if (hours >= ACTIVITY_SCHEDULE.lunch.start && hours < ACTIVITY_SCHEDULE.lunch.end) {
+                return ACTIVITY_SCHEDULE.lunch.label;
+            }
+            if (hours >= ACTIVITY_SCHEDULE.afternoon.start && hours < ACTIVITY_SCHEDULE.afternoon.end) {
+                return ACTIVITY_SCHEDULE.afternoon.label;
+            }
+            if (hours >= ACTIVITY_SCHEDULE.dinner.start && hours < ACTIVITY_SCHEDULE.dinner.end) {
+                return ACTIVITY_SCHEDULE.dinner.label;
+            }
+            if (hours >= ACTIVITY_SCHEDULE.evening.start && hours < ACTIVITY_SCHEDULE.evening.end) {
+                return ACTIVITY_SCHEDULE.evening.label;
+            }
+            return ACTIVITY_SCHEDULE.sleep.label;
+        }
+        
+        function getBackgroundColor(hours) {
+            if (hours >= 6 && hours < 12) return 'bg-morning';
+            if (hours >= 12 && hours < 17) return 'bg-afternoon';
+            if (hours >= 17 && hours < 22) return 'bg-evening';
+            return 'bg-night';
+        }
+        
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const isPM = hours >= 12;
+            const displayHours = hours % 12 || 12;
+            
+            // Days of week
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayName = days[now.getDay()];
+            
+            // Format time
+            const timeStr = String(displayHours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0');
+            const periodStr = isPM ? 'PM' : 'AM';
+            
+            // Get activity and background
+            const activity = getActivity(hours);
+            const bgClass = getBackgroundColor(hours);
+            
+            // Update DOM
+            document.getElementById('day').textContent = dayName;
+            document.getElementById('time').textContent = timeStr;
+            document.getElementById('period').textContent = periodStr;
+            document.getElementById('activity').textContent = activity;
+            
+            // Update background
+            document.body.className = bgClass;
+        }
+        
+        // Update immediately and then every second
+        updateClock();
+        setInterval(updateClock, 1000);
+        
+        // Service worker registration for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {
+                console.log('Service worker registration skipped');
+            });
+        }
+    </script>
+</body>
+</html>

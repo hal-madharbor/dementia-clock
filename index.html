@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Clock">
+    <link rel="manifest" href="manifest.json">
+    <title>Activity Clock</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            transition: background-color 0.5s;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+        }
+        
+        .settings-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            background: white;
+            border: 3px solid #1a1a1a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 2rem;
+            z-index: 100;
+            transition: all 0.3s;
+        }
+        
+        .settings-btn:hover {
+            background: #f3f4f6;
+        }
+        
+        .settings-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .bg-night .settings-btn {
+            background: #475569;
+            border-color: #94a3b8;
+            color: white;
+        }
+        
+        .caregiver-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: 3px solid #1a1a1a;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 2rem;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        
+        .caregiver-toggle:hover {
+            background: #f3f4f6;
+        }
+        
+        .caregiver-toggle:active {
+            transform: scale(0.95);
+        }
+        
+        .bg-night .caregiver-toggle {
+            background: #475569;
+            border-color: #94a3b8;
+            color: white;
+        }
+        
+        /* Force button visibility - override any display:none */
+        .caregiver-toggle:not([style*="display: none"]) {
+            display: flex !important;
+        }
+        
+        .photos-section {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .photo-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 4px solid #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: white;
+            object-fit: cover;
+        }
+        
+        .photo img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .bg-night .photo {
+            border-color: #94a3b8;
+        }
+        
+        .photo-name {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+        
+        .datetime-row {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 3rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 3rem;
+        }
+        
+        .time {
+            font-size: 10rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+        
+        .period-day-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: bold;
+            line-height: 1.2;
+            gap: 0.5rem;
+        }
+        
+        .activity {
+            font-size: 5rem;
+            font-weight: bold;
+            padding: 2rem 3rem;
+            border-radius: 2rem;
+            background: white;
+            border: 4px solid #1a1a1a;
+        }
+        
+        .bg-morning { background-color: #fef3c7; color: #1a1a1a; }
+        .bg-afternoon { background-color: #dbeafe; color: #1a1a1a; }
+        .bg-evening { background-color: #e9d5ff; color: #1a1a1a; }
+        .bg-night { background-color: #334155; color: white; }
+        
+        .bg-night .activity {
+            background-color: #475569;
+            border-color: #94a3b8;
+            color: white;
+        }
+        
+        .bg-night .photo-name {
+            color: #e2e8f0;
+        }
+        
+        .settings-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .settings-panel.active {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .settings-header {
+            background: #1a1a1a;
+            color: white;
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .settings-tabs {
+            display: flex;
+            background: #f3f4f6;
+            border-bottom: 2px solid #e5e7eb;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            background: #f3f4f6;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            min-width: 120px;
+        }
+        
+        .tab:hover {
+            background: #e5e7eb;
+        }
+        
+        .tab.active {
+            background: white;
+            border-bottom: 3px solid #1a1a1a;
+        }
+        
+        .settings-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .tab-panel {
+            display: none;
+        }
+        
+        .tab-panel.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            border: 2px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-family: inherit;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #1a1a1a;
+        }
+        
+        .photo-upload-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border: 2px dashed #d1d5db;
+            border-radius: 0.5rem;
+        }
+        
+        .photo-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            border: 3px solid #d1d5db;
+            object-fit: cover;
+        }
+        
+        .photo-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #1a1a1a;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #374151;
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #1a1a1a;
+        }
+        
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .settings-actions {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: #f9fafb;
+            border-top: 2px solid #e5e7eb;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .schedule-grid {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .schedule-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr 2fr;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .caregiver-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .caregiver-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .settings-btn, .caregiver-toggle {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+                top: 10px;
+            }
+            
+            .settings-btn {
+                left: 10px;
+            }
+            
+            .caregiver-toggle {
+                right: 10px;
+            }
+            
+            .photo {
+                width: 150px;
+                height: 150px;
+                font-size: 3rem;
+            }
+            
+            .photo-name { font-size: 1.5rem; }
+            .datetime-row { 
+                gap: 1.5rem;
+            }
+            .time { font-size: 6rem; }
+            .period-day-stack { font-size: 2rem; }
+            .activity { font-size: 3.5rem; padding: 1.5rem 2rem; }
+            
+            .schedule-item {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <button class="settings-btn" id="settingsBtn" title="Settings">⚙️</button>
+    <button class="caregiver-toggle" id="caregiverToggle" title="Change caregiver">👤</button>
+
+    <div class="container" id="clockDisplay">
+        <div class="photos-section">
+            <div class="photo-card">
+                <div class="photo" id="patientPhoto">I</div>
+                <div class="photo-name" id="patientName">Ilona</div>
+            </div>
+            <div class="photo-card">
+                <div class="photo" id="spousePhoto">H</div>
+                <div class="photo-name" id="spouseName">Hal</div>
+            </div>
+            <div class="photo-card" id="caregiverCard" style="display: none;">
+                <div class="photo" id="caregiverPhoto">C</div>
+                <div class="photo-name" id="caregiverName">Caregiver</div>
+            </div>
+        </div>
+        
+        <div class="datetime-row">
+            <span class="time" id="time"></span>
+            <div class="period-day-stack">
+                <span id="period"></span>
+                <span id="day"></span>
+            </div>
+        </div>
+        <div class="activity" id="activity"></div>
+    </div>
+
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">⚙️ Clock Settings</div>
+        
+        <div class="settings-tabs">
+            <button class="tab active" data-tab="personal">Personal Info</button>
+            <button class="tab" data-tab="schedule">Daily Schedule</button>
+            <button class="tab" data-tab="caregivers">Caregivers</button>
+            <button class="tab" data-tab="caregiverinfo">Caregiver Info</button>
+            <button class="tab" data-tab="events">Special Events</button>
+            <button class="tab" data-tab="popups">Pop-up Tasks</button>
+            <button class="tab" data-tab="medications">Medications</button>
+            <button class="tab" data-tab="help">Help</button>
+        </div>
+        
+        <div class="settings-content">
+            <div class="tab-panel active" id="personal">
+                <h2>Personal Information</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Patient First Name</label>
+                    <input type="text" class="form-input" id="firstName" placeholder="Legal first name">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Patient Last Name</label>
+                    <input type="text" class="form-input" id="lastName" placeholder="Legal last name">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Display Name (shown on clock)</label>
+                    <input type="text" class="form-input" id="displayName" placeholder="Nickname or preferred name">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Patient Photo</label>
+                    <div class="photo-upload-section">
+                        <div class="photo-preview" id="patientPhotoPreview">P</div>
+                        <img id="patientPhotoImg" class="photo-preview" style="display:none;" alt="Patient">
+                        <input type="file" id="patientPhotoInput" accept="image/*" style="display:none;">
+                        <div class="photo-buttons">
+                            <button class="btn btn-secondary" id="patientPhotoChoose">📁 Choose Photo</button>
+                            <button class="btn btn-secondary" id="patientPhotoRemove">🗑️ Remove</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Primary Caregiver Full Name</label>
+                    <input type="text" class="form-input" id="primaryCaregiverName" placeholder="Legal full name">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Display Name (shown on clock)</label>
+                    <input type="text" class="form-input" id="primaryCaregiverDisplayName" placeholder="Nickname or preferred name">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Primary Caregiver Relationship</label>
+                    <input type="text" class="form-input" id="primaryCaregiverRelationship" placeholder="e.g., Spouse, Daughter, Son, Partner">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Primary Caregiver Phone</label>
+                    <input type="tel" class="form-input" id="primaryCaregiverPhone" placeholder="Phone number">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Primary Caregiver Photo</label>
+                    <div class="photo-upload-section">
+                        <div class="photo-preview" id="primaryCaregiverPhotoPreview">C</div>
+                        <img id="primaryCaregiverPhotoImg" class="photo-preview" style="display:none;" alt="Caregiver">
+                        <input type="file" id="primaryCaregiverPhotoInput" accept="image/*" style="display:none;">
+                        <div class="photo-buttons">
+                            <button class="btn btn-secondary" id="primaryCaregiverPhotoChoose">📁 Choose Photo</button>
+                            <button class="btn btn-secondary" id="primaryCaregiverPhotoRemove">🗑️ Remove</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-panel" id="schedule">
+                <h2>Daily Activity Schedule</h2>
+                <p style="margin-bottom: 1rem; color: #666;">Set the times for each daily activity.</p>
+                
+                <div class="schedule-grid">
+                    <div class="schedule-item">
+                        <label class="form-label">Start</label>
+                        <label class="form-label">End</label>
+                        <label class="form-label">Activity</label>
+                    </div>
+                    <div class="schedule-item">
+                        <input type="time" class="form-input" value="06:00">
+                        <input type="time" class="form-input" value="09:00">
+                        <input type="text" class="form-input" value="Breakfast Time">
+                    </div>
+                    <div class="schedule-item">
+                        <input type="time" class="form-input" value="09:00">
+                        <input type="time" class="form-input" value="12:00">
+                        <input type="text" class="form-input" value="Morning Time">
+                    </div>
+                    <div class="schedule-item">
+                        <input type="time" class="form-input" value="12:00">
+                        <input type="time" class="form-input" value="13:00">
+                        <input type="text" class="form-input" value="Lunch Time">
+                    </div>
+                    <div class="schedule-item">
+                        <input type="time" class="form-input" value="13:00">
+                        <input type="time" class="form-input" value="17:00">
+                        <input type="text" class="form-input" value="Afternoon Time">
+                    </div>
+                    <div class="schedule-item">
+                        <input type="time" class="form-input" value="17:00">
+                        <input type="time" class="form-input" value="19:00">
+                        <input type="text" class="form-input" value="Dinner Time">
+                    </div>
+                    <div class="schedule-item">
+                        <input type="time" class="form-input" value="19:00">
+                        <input type="time" class="form-input" value="22:00">
+                        <input type="text" class="form-input" value="Evening Time">
+                    </div>
+                    <div class="schedule-item">
+                        <input type="time" class="form-input" value="22:00">
+                        <input type="time" class="form-input" value="06:00">
+                        <input type="text" class="form-input" value="Sleep Time">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-panel" id="caregivers">
+                <h2>Additional Caregivers</h2>
+                <p style="margin-bottom: 1rem; color: #666;">Add other people who help with care. Use the 👤 button on the clock to display who is currently helping.</p>
+                
+                <div class="caregiver-list"></div>
+                
+                <button class="btn btn-primary" id="addCaregiverBtn" style="margin-top: 1rem;">+ Add Caregiver</button>
+                
+                <div style="margin-top: 2rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem; color: #666;">
+                    <strong>Note:</strong> Display names are what appear on the clock. Full names are for records and emergency contacts.
+                </div>
+            </div>
+            
+            <div class="tab-panel" id="caregiverinfo">
+                <h2>Caregiver Reference Information</h2>
+                <p style="margin-bottom: 1.5rem; color: #666;">Emergency contacts, medical team, and important information for caregivers.</p>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Emergency Contacts</h3>
+                <div class="form-group">
+                    <label class="form-label">Primary Emergency Contact</label>
+                    <input type="text" class="form-input" id="emergencyContact1Name" placeholder="Name">
+                    <input type="tel" class="form-input" style="margin-top: 0.5rem;" id="emergencyContact1Phone" placeholder="Phone Number">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Secondary Emergency Contact</label>
+                    <input type="text" class="form-input" id="emergencyContact2Name" placeholder="Name">
+                    <input type="tel" class="form-input" style="margin-top: 0.5rem;" id="emergencyContact2Phone" placeholder="Phone Number">
+                </div>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Medical Team</h3>
+                <div class="form-group">
+                    <label class="form-label">Primary Physician</label>
+                    <input type="text" class="form-input" id="primaryPhysicianName" placeholder="Dr. Name">
+                    <input type="tel" class="form-input" style="margin-top: 0.5rem;" id="primaryPhysicianPhone" placeholder="Phone Number">
+                </div>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Legal & Directives</h3>
+                <div class="form-group">
+                    <label class="form-label">Power of Attorney</label>
+                    <input type="text" class="form-input" id="poaName" placeholder="Name">
+                    <input type="tel" class="form-input" style="margin-top: 0.5rem;" id="poaPhone" placeholder="Phone Number">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">DNR Status</label>
+                    <select class="form-input" id="dnrStatus">
+                        <option value="">Select...</option>
+                        <option value="Yes">Yes - DNR on file</option>
+                        <option value="No">No - Full resuscitation</option>
+                    </select>
+                </div>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Medical Information</h3>
+                <div class="form-group">
+                    <label class="form-label">Known Allergies</label>
+                    <textarea class="form-input" id="allergies" rows="3" placeholder="List any allergies"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Current Diagnoses/Conditions</label>
+                    <textarea class="form-input" id="conditions" rows="3" placeholder="List current medical conditions"></textarea>
+                </div>
+            </div>
+            
+            <div class="tab-panel" id="events">
+                <h2>Special Events & Holidays</h2>
+                <p style="margin-bottom: 1rem; color: #666;">Coming in Phase 3</p>
+            </div>
+            
+            <div class="tab-panel" id="popups">
+                <h2>Pop-up Task Reminders</h2>
+                <p style="margin-bottom: 1rem; color: #666;">Coming in Phase 4</p>
+            </div>
+            <div class="tab-panel" id="help">
+                <h2 style="color: #1a1a1a;">Help & Information</h2>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Understanding Data Storage</h3>
+                <p style="margin-bottom: 1rem; color: #374151;">Your settings are saved automatically to your device's browser storage (localStorage). This means:</p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem; line-height: 1.6; color: #374151;">
+                    <li><strong>Privacy:</strong> Your information never leaves your device - no server sees or stores your data</li>
+                    <li><strong>Browser-specific:</strong> Each browser has separate settings (iPad Safari ≠ MacBook Safari)</li>
+                    <li><strong>Device-specific:</strong> Settings on one device don't sync to others</li>
+                </ul>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #ef4444;">⚠️ Important Warning</h3>
+                <p style="margin-bottom: 1rem; padding: 1rem; background: #fee2e2; border-radius: 0.5rem; color: #991b1b;">
+                    <strong>Clearing browser data will DELETE all your settings!</strong> This includes all names, photos, schedules, and customizations.
+                </p>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Protect Your Settings</h3>
+                <p style="margin-bottom: 1rem; color: #374151;"><strong>Export regularly as backup:</strong></p>
+                <ol style="margin-left: 2rem; margin-bottom: 1rem; line-height: 1.6; color: #374151;">
+                    <li>Click "💾 Export" button (below)</li>
+                    <li>File named <code style="background: #f3f4f6; padding: 0.2rem 0.4rem; border-radius: 0.25rem;">clock-settings.json</code> downloads</li>
+                    <li>Save it somewhere safe (email to yourself, iCloud Drive, computer)</li>
+                    <li>To restore: Click "📂 Import" and select your backup file</li>
+                </ol>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Transferring Between Devices</h3>
+                <p style="margin-bottom: 1rem; color: #374151;">To use the same settings on multiple devices:</p>
+                <ol style="margin-left: 2rem; margin-bottom: 1rem; line-height: 1.6; color: #374151;">
+                    <li>Export settings from first device</li>
+                    <li>Send file to second device (email, AirDrop)</li>
+                    <li>Import on second device</li>
+                </ol>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Troubleshooting</h3>
+                <p style="margin-bottom: 0.5rem; color: #374151;"><strong>Settings won't save:</strong></p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem; line-height: 1.6; color: #374151;">
+                    <li>Make sure you clicked "Save" button</li>
+                    <li>Check Settings → Safari → Block All Cookies is OFF</li>
+                </ul>
+                
+                <p style="margin-bottom: 0.5rem; color: #374151;"><strong>Settings disappeared:</strong></p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem; line-height: 1.6; color: #374151;">
+                    <li>Did you clear browser data? Import your backup file</li>
+                    <li>Switched browsers? Each browser has separate settings</li>
+                </ul>
+                
+                <p style="margin-bottom: 0.5rem; color: #374151;"><strong>Photos not loading:</strong></p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem; line-height: 1.6; color: #374151;">
+                    <li>Keep photos under 2MB</li>
+                    <li>Use JPG or PNG format</li>
+                </ul>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Privacy & Security</h3>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem; line-height: 1.6; color: #374151;">
+                    <li>All data stored locally on YOUR device only</li>
+                    <li>Photos stored as data in your browser</li>
+                    <li>No internet connection needed after first load</li>
+                    <li>No accounts, tracking, or analytics</li>
+                    <li>We never see your information</li>
+                </ul>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">More Information</h3>
+                <p style="margin-bottom: 1rem; color: #374151;">
+                    For complete documentation, visit: <a href="https://github.com/hal-madharbor/dementia-clock" target="_blank" style="color: #2563eb; text-decoration: underline;">GitHub Repository</a>
+                </p>
+                
+                <p style="margin-top: 2rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem; color: #666;">
+                    <strong>Version:</strong> 2.0 (Phase 2 Complete)<br>
+                    <strong>Last Updated:</strong> October 2025
+                </p>
+            </div>
+        </div>
+        
+        <div class="settings-actions">
+            <button class="btn btn-secondary" id="exportBtn">💾 Export</button>
+            <button class="btn btn-secondary" id="importBtn">📂 Import</button>
+            <button class="btn btn-danger" id="resetBtn">🔄 Reset</button>
+            <button class="btn btn-secondary" id="cancelBtn">✕ Cancel</button>
+            <button class="btn btn-primary" id="saveBtn">✓ Save</button>
+        </div>
+    </div>
+
+    <script>
+        const DEFAULT_SETTINGS = {
+            firstName: "Ilona",
+            lastName: "Jones",
+            displayName: "Ilona",
+            photo: null,
+            primaryCaregiver: {
+                name: "Hal",
+                displayName: "Hal",
+                relationship: "Husband",
+                phone: "",
+                photo: null
+            },
+            additionalCaregivers: [],
+            currentCaregiverIndex: -1,
+            schedule: [
+                { start: "06:00", end: "09:00", label: "Breakfast Time" },
+                { start: "09:00", end: "12:00", label: "Morning Time" },
+                { start: "12:00", end: "13:00", label: "Lunch Time" },
+                { start: "13:00", end: "17:00", label: "Afternoon Time" },
+                { start: "17:00", end: "19:00", label: "Dinner Time" },
+                { start: "19:00", end: "22:00", label: "Evening Time" },
+                { start: "22:00", end: "06:00", label: "Sleep Time" }
+            ],
+            caregiverInfo: {
+                emergencyContacts: {
+                    contact1: { name: "", phone: "" },
+                    contact2: { name: "", phone: "" }
+                },
+                medicalTeam: {
+                    primaryPhysician: { name: "", phone: "" }
+                },
+                legal: {
+                    poa: { name: "", phone: "" },
+                    dnrStatus: ""
+                },
+                medical: {
+                    allergies: "",
+                    conditions: ""
+                }
+            }
+        };
+        
+        let settings = loadSettings();
+        
+        function handlePhotoUpload(inputElement, previewElement, imgElement, callback) {
+            inputElement.click();
+            inputElement.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert('Photo too large. Please use a photo under 2MB.');
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const base64 = event.target.result;
+                        imgElement.src = base64;
+                        imgElement.style.display = 'block';
+                        previewElement.style.display = 'none';
+                        if (callback) callback(base64);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+        }
+        
+        function removePhoto(previewElement, imgElement, initialText, callback) {
+            imgElement.style.display = 'none';
+            imgElement.src = '';
+            previewElement.style.display = 'flex';
+            previewElement.textContent = initialText;
+            if (callback) callback(null);
+        }
+        
+        function displayPhoto(imgElement, previewElement, base64Data, fallbackText) {
+            if (base64Data) {
+                imgElement.src = base64Data;
+                imgElement.style.display = 'block';
+                previewElement.style.display = 'none';
+            } else {
+                imgElement.style.display = 'none';
+                previewElement.style.display = 'flex';
+                previewElement.textContent = fallbackText;
+            }
+        }
+        
+        document.getElementById('patientPhotoChoose').addEventListener('click', () => {
+            handlePhotoUpload(
+                document.getElementById('patientPhotoInput'),
+                document.getElementById('patientPhotoPreview'),
+                document.getElementById('patientPhotoImg'),
+                (base64) => { settings.photo = base64; }
+            );
+        });
+        
+        document.getElementById('patientPhotoRemove').addEventListener('click', () => {
+            removePhoto(
+                document.getElementById('patientPhotoPreview'),
+                document.getElementById('patientPhotoImg'),
+                settings.displayName[0] || 'P',
+                (val) => { settings.photo = val; }
+            );
+        });
+        
+        document.getElementById('primaryCaregiverPhotoChoose').addEventListener('click', () => {
+            handlePhotoUpload(
+                document.getElementById('primaryCaregiverPhotoInput'),
+                document.getElementById('primaryCaregiverPhotoPreview'),
+                document.getElementById('primaryCaregiverPhotoImg'),
+                (base64) => { settings.primaryCaregiver.photo = base64; }
+            );
+        });
+        
+        document.getElementById('primaryCaregiverPhotoRemove').addEventListener('click', () => {
+            removePhoto(
+                document.getElementById('primaryCaregiverPhotoPreview'),
+                document.getElementById('primaryCaregiverPhotoImg'),
+                settings.primaryCaregiver.displayName[0] || 'C',
+                (val) => { settings.primaryCaregiver.photo = val; }
+            );
+        });
+        
+        function saveSettings() {
+            try {
+                localStorage.setItem('dementiaClockSettings', JSON.stringify(settings));
+                return true;
+            } catch (error) {
+                console.error('Error saving:', error);
+                alert('Error saving settings.');
+                return false;
+            }
+        }
+        
+        function loadSettings() {
+            try {
+                const saved = localStorage.getItem('dementiaClockSettings');
+                if (saved) {
+                    const loaded = JSON.parse(saved);
+                    if (!loaded.caregiverInfo) {
+                        loaded.caregiverInfo = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.caregiverInfo));
+                    }
+                    if (!loaded.displayName) {
+                        loaded.displayName = loaded.firstName || "Patient";
+                    }
+                    if (!loaded.photo) {
+                        loaded.photo = null;
+                    }
+                    if (!loaded.primaryCaregiver) {
+                        loaded.primaryCaregiver = {
+                            name: loaded.spouseName || "Caregiver",
+                            displayName: loaded.spouseName || "Caregiver",
+                            relationship: "Primary Caregiver",
+                            phone: "",
+                            photo: null
+                        };
+                    }
+                    if (!loaded.primaryCaregiver.displayName) {
+                        loaded.primaryCaregiver.displayName = loaded.primaryCaregiver.name;
+                    }
+                    if (!loaded.primaryCaregiver.phone) {
+                        loaded.primaryCaregiver.phone = "";
+                    }
+                    if (!loaded.primaryCaregiver.photo) {
+                        loaded.primaryCaregiver.photo = null;
+                    }
+                    if (!loaded.additionalCaregivers) {
+                        loaded.additionalCaregivers = [];
+                        loaded.currentCaregiverIndex = -1;
+                    }
+                    loaded.additionalCaregivers.forEach(cg => {
+                        if (!cg.phone) cg.phone = "";
+                        if (!cg.displayName) cg.displayName = cg.name;
+                        if (!cg.photo) cg.photo = null;
+                    });
+                    return loaded;
+                }
+            } catch (error) {
+                console.error('Error loading:', error);
+            }
+            return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+        }
+        
+        function resetSettings() {
+            settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+            saveSettings();
+            loadSettingsIntoForm();
+            updateClock();
+            updateCaregiverDisplay();
+        }
+        
+        function loadSettingsIntoForm() {
+            document.getElementById('firstName').value = settings.firstName;
+            document.getElementById('lastName').value = settings.lastName;
+            document.getElementById('displayName').value = settings.displayName;
+            document.getElementById('primaryCaregiverName').value = settings.primaryCaregiver.name;
+            document.getElementById('primaryCaregiverDisplayName').value = settings.primaryCaregiver.displayName;
+            document.getElementById('primaryCaregiverRelationship').value = settings.primaryCaregiver.relationship;
+            document.getElementById('primaryCaregiverPhone').value = settings.primaryCaregiver.phone;
+            
+            displayPhoto(
+                document.getElementById('patientPhotoImg'),
+                document.getElementById('patientPhotoPreview'),
+                settings.photo,
+                settings.displayName[0] || 'P'
+            );
+            
+            displayPhoto(
+                document.getElementById('primaryCaregiverPhotoImg'),
+                document.getElementById('primaryCaregiverPhotoPreview'),
+                settings.primaryCaregiver.photo,
+                settings.primaryCaregiver.displayName[0] || 'C'
+            );
+            
+            const scheduleInputs = document.querySelectorAll('#schedule .schedule-item');
+            settings.schedule.forEach((item, index) => {
+                const row = scheduleInputs[index + 1];
+                if (row) {
+                    const inputs = row.querySelectorAll('.form-input');
+                    inputs[0].value = item.start;
+                    inputs[1].value = item.end;
+                    inputs[2].value = item.label;
+                }
+            });
+            
+            renderCaregiverList();
+            
+            document.getElementById('emergencyContact1Name').value = settings.caregiverInfo.emergencyContacts.contact1.name || '';
+            document.getElementById('emergencyContact1Phone').value = settings.caregiverInfo.emergencyContacts.contact1.phone || '';
+            document.getElementById('emergencyContact2Name').value = settings.caregiverInfo.emergencyContacts.contact2.name || '';
+            document.getElementById('emergencyContact2Phone').value = settings.caregiverInfo.emergencyContacts.contact2.phone || '';
+            document.getElementById('primaryPhysicianName').value = settings.caregiverInfo.medicalTeam.primaryPhysician.name || '';
+            document.getElementById('primaryPhysicianPhone').value = settings.caregiverInfo.medicalTeam.primaryPhysician.phone || '';
+            document.getElementById('poaName').value = settings.caregiverInfo.legal.poa.name || '';
+            document.getElementById('poaPhone').value = settings.caregiverInfo.legal.poa.phone || '';
+            document.getElementById('dnrStatus').value = settings.caregiverInfo.legal.dnrStatus || '';
+            document.getElementById('allergies').value = settings.caregiverInfo.medical.allergies || '';
+            document.getElementById('conditions').value = settings.caregiverInfo.medical.conditions || '';
+        }
+        
+        function saveFormToSettings() {
+            settings.firstName = document.getElementById('firstName').value.trim();
+            settings.lastName = document.getElementById('lastName').value.trim();
+            settings.displayName = document.getElementById('displayName').value.trim() || settings.firstName;
+            settings.primaryCaregiver.name = document.getElementById('primaryCaregiverName').value.trim();
+            settings.primaryCaregiver.displayName = document.getElementById('primaryCaregiverDisplayName').value.trim() || settings.primaryCaregiver.name;
+            settings.primaryCaregiver.relationship = document.getElementById('primaryCaregiverRelationship').value.trim();
+            settings.primaryCaregiver.phone = document.getElementById('primaryCaregiverPhone').value.trim();
+            
+            const scheduleInputs = document.querySelectorAll('#schedule .schedule-item');
+            settings.schedule = [];
+            scheduleInputs.forEach((row, index) => {
+                if (index === 0) return;
+                const inputs = row.querySelectorAll('.form-input');
+                settings.schedule.push({
+                    start: inputs[0].value,
+                    end: inputs[1].value,
+                    label: inputs[2].value.trim()
+                });
+            });
+            
+            settings.caregiverInfo.emergencyContacts.contact1.name = document.getElementById('emergencyContact1Name').value.trim();
+            settings.caregiverInfo.emergencyContacts.contact1.phone = document.getElementById('emergencyContact1Phone').value.trim();
+            settings.caregiverInfo.emergencyContacts.contact2.name = document.getElementById('emergencyContact2Name').value.trim();
+            settings.caregiverInfo.emergencyContacts.contact2.phone = document.getElementById('emergencyContact2Phone').value.trim();
+            settings.caregiverInfo.medicalTeam.primaryPhysician.name = document.getElementById('primaryPhysicianName').value.trim();
+            settings.caregiverInfo.medicalTeam.primaryPhysician.phone = document.getElementById('primaryPhysicianPhone').value.trim();
+            settings.caregiverInfo.legal.poa.name = document.getElementById('poaName').value.trim();
+            settings.caregiverInfo.legal.poa.phone = document.getElementById('poaPhone').value.trim();
+            settings.caregiverInfo.legal.dnrStatus = document.getElementById('dnrStatus').value;
+            settings.caregiverInfo.medical.allergies = document.getElementById('allergies').value.trim();
+            settings.caregiverInfo.medical.conditions = document.getElementById('conditions').value.trim();
+            
+            return saveSettings();
+        }
+        
+        function renderCaregiverList() {
+            const container = document.querySelector('.caregiver-list');
+            container.innerHTML = '';
+            
+            if (settings.additionalCaregivers.length === 0) {
+                container.innerHTML = '<p style="color: #666; padding: 1rem;">No additional caregivers added yet.</p>';
+                return;
+            }
+            
+            settings.additionalCaregivers.forEach((caregiver, index) => {
+                const item = document.createElement('div');
+                item.className = 'caregiver-item';
+                
+                const photoPreview = caregiver.photo 
+                    ? `<img src="${caregiver.photo}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">` 
+                    : `<div class="photo-preview" style="width: 80px; height: 80px; font-size: 2rem;">${(caregiver.displayName || caregiver.name)[0]}</div>`;
+                
+                item.innerHTML = `
+                    ${photoPreview}
+                    <div style="flex: 1;">
+                        <input type="text" class="form-input caregiver-name-input" data-index="${index}" value="${caregiver.name}" placeholder="Full Name" style="margin-bottom: 0.5rem;">
+                        <input type="text" class="form-input caregiver-displayname-input" data-index="${index}" value="${caregiver.displayName || ''}" placeholder="Display Name" style="margin-bottom: 0.5rem;">
+                        <input type="text" class="form-input caregiver-relationship-input" data-index="${index}" value="${caregiver.relationship || ''}" placeholder="Relationship" style="margin-bottom: 0.5rem;">
+                        <input type="tel" class="form-input caregiver-phone-input" data-index="${index}" value="${caregiver.phone || ''}" placeholder="Phone">
+                    </div>
+                    <button class="btn btn-secondary caregiver-photo-btn" data-index="${index}">📷 Photo</button>
+                    <button class="btn btn-danger remove-caregiver-btn" data-index="${index}">✕</button>
+                `;
+                container.appendChild(item);
+            });
+            
+            document.querySelectorAll('.remove-caregiver-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    settings.additionalCaregivers.splice(index, 1);
+                    if (settings.currentCaregiverIndex >= settings.additionalCaregivers.length) {
+                        settings.currentCaregiverIndex = -1;
+                    }
+                    renderCaregiverList();
+                    updateCaregiverDisplay();
+                });
+            });
+            
+            document.querySelectorAll('.caregiver-photo-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.onchange = (evt) => {
+                        const file = evt.target.files[0];
+                        if (file) {
+                            if (file.size > 2 * 1024 * 1024) {
+                                alert('Photo too large. Please use under 2MB.');
+                                return;
+                            }
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                                settings.additionalCaregivers[index].photo = event.target.result;
+                                renderCaregiverList();
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    };
+                    input.click();
+                });
+            });
+            
+            document.querySelectorAll('.caregiver-name-input').forEach(input => {
+                input.addEventListener('blur', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    const name = e.target.value.trim();
+                    if (name) {
+                        settings.additionalCaregivers[index].name = name;
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.caregiver-displayname-input').forEach(input => {
+                input.addEventListener('blur', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    settings.additionalCaregivers[index].displayName = e.target.value.trim() || settings.additionalCaregivers[index].name;
+                    renderCaregiverList();
+                });
+            });
+            
+            document.querySelectorAll('.caregiver-relationship-input').forEach(input => {
+                input.addEventListener('blur', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    settings.additionalCaregivers[index].relationship = e.target.value.trim();
+                });
+            });
+            
+            document.querySelectorAll('.caregiver-phone-input').forEach(input => {
+                input.addEventListener('blur', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    settings.additionalCaregivers[index].phone = e.target.value.trim();
+                });
+            });
+        }
+        
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+            loadSettingsIntoForm();
+            document.getElementById('settingsPanel').classList.add('active');
+        });
+        
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            if (confirm('Discard unsaved changes?')) {
+                document.getElementById('settingsPanel').classList.remove('active');
+            }
+        });
+        
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            if (saveFormToSettings()) {
+                alert('Settings saved!');
+                updateClock();
+                updateCaregiverDisplay();
+                document.getElementById('settingsPanel').classList.remove('active');
+            }
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (confirm('Reset all settings?')) {
+                resetSettings();
+                alert('Settings reset.');
+            }
+        });
+        
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            try {
+                const dataStr = JSON.stringify(settings, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'clock-settings.json';
+                link.click();
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                alert('Error exporting.');
+            }
+        });
+        
+        document.getElementById('importBtn').addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        try {
+                            const imported = JSON.parse(event.target.result);
+                            if (confirm('Import settings?')) {
+                                settings = imported;
+                                saveSettings();
+                                loadSettingsIntoForm();
+                                updateClock();
+                                updateCaregiverDisplay();
+                                alert('Imported!');
+                            }
+                        } catch (error) {
+                            alert('Error importing.');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        });
+        
+        document.getElementById('addCaregiverBtn').addEventListener('click', () => {
+            const newName = prompt('Enter full name:');
+            if (newName && newName.trim()) {
+                const displayName = prompt('Display name (or leave blank):');
+                const relationship = prompt('Relationship:');
+                const phone = prompt('Phone:');
+                settings.additionalCaregivers.push({
+                    name: newName.trim(),
+                    displayName: displayName ? displayName.trim() : newName.trim(),
+                    relationship: relationship ? relationship.trim() : '',
+                    phone: phone ? phone.trim() : ''
+                });
+                renderCaregiverList();
+            }
+        });
+        
+        document.getElementById('caregiverToggle').addEventListener('click', () => {
+            if (settings.additionalCaregivers.length === 0) {
+                return;
+            }
+            settings.currentCaregiverIndex++;
+            if (settings.currentCaregiverIndex >= settings.additionalCaregivers.length) {
+                settings.currentCaregiverIndex = -1;
+            }
+            saveSettings();
+            updateCaregiverDisplay();
+        });
+        
+        function updateCaregiverDisplay() {
+            const caregiverCard = document.getElementById('caregiverCard');
+            const toggleBtn = document.getElementById('caregiverToggle');
+            
+            if (settings.additionalCaregivers.length === 0) {
+                toggleBtn.style.display = 'none';
+                caregiverCard.style.display = 'none';
+                return;
+            } else {
+                toggleBtn.style.display = 'flex';
+            }
+            
+            if (settings.currentCaregiverIndex >= 0 && settings.currentCaregiverIndex < settings.additionalCaregivers.length) {
+                const caregiver = settings.additionalCaregivers[settings.currentCaregiverIndex];
+                caregiverCard.style.display = 'flex';
+                document.getElementById('caregiverName').textContent = caregiver.displayName || caregiver.name;
+                const caregiverPhotoEl = document.getElementById('caregiverPhoto');
+                if (caregiver.photo) {
+                    caregiverPhotoEl.innerHTML = `<img src="${caregiver.photo}" alt="Caregiver">`;
+                } else {
+                    caregiverPhotoEl.textContent = (caregiver.displayName || caregiver.name)[0];
+                }
+            } else {
+                caregiverCard.style.display = 'none';
+            }
+        }
+        
+        function timeToHour(timeStr) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours + minutes / 60;
+        }
+        
+        function getActivity(hours) {
+            const currentTime = hours;
+            for (let i = 0; i < settings.schedule.length; i++) {
+                const item = settings.schedule[i];
+                const start = timeToHour(item.start);
+                const end = timeToHour(item.end);
+                if (start > end) {
+                    if (currentTime >= start || currentTime < end) {
+                        return item.label;
+                    }
+                } else {
+                    if (currentTime >= start && currentTime < end) {
+                        return item.label;
+                    }
+                }
+            }
+            return settings.schedule[settings.schedule.length - 1].label;
+        }
+        
+        function getBackgroundColor(hours) {
+            if (hours >= 6 && hours < 12) return 'bg-morning';
+            if (hours >= 12 && hours < 17) return 'bg-afternoon';
+            if (hours >= 17 && hours < 22) return 'bg-evening';
+            return 'bg-night';
+        }
+        
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const isPM = hours >= 12;
+            const displayHours = hours % 12 || 12;
+            
+            const dayAbbrev = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const dayName = dayAbbrev[now.getDay()];
+            
+            const timeStr = String(displayHours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0');
+            const periodStr = isPM ? 'PM' : 'AM';
+            
+            const currentHourDecimal = hours + minutes / 60;
+            const activity = getActivity(currentHourDecimal);
+            const bgClass = getBackgroundColor(hours);
+            
+            document.getElementById('day').textContent = dayName;
+            document.getElementById('time').textContent = timeStr;
+            document.getElementById('period').textContent = periodStr;
+            document.getElementById('activity').textContent = activity;
+            document.body.className = bgClass;
+            
+            document.getElementById('patientName').textContent = settings.displayName;
+            const patientPhotoEl = document.getElementById('patientPhoto');
+            if (settings.photo) {
+                patientPhotoEl.innerHTML = `<img src="${settings.photo}" alt="Patient">`;
+            } else {
+                patientPhotoEl.textContent = settings.displayName[0] || 'P';
+            }
+            
+            document.getElementById('spouseName').textContent = settings.primaryCaregiver.displayName;
+            const spousePhotoEl = document.getElementById('spousePhoto');
+            if (settings.primaryCaregiver.photo) {
+                spousePhotoEl.innerHTML = `<img src="${settings.primaryCaregiver.photo}" alt="Caregiver">`;
+            } else {
+                spousePhotoEl.textContent = settings.primaryCaregiver.displayName[0] || 'C';
+            }
+        }
+        
+        loadSettingsIntoForm();
+        updateClock();
+        setInterval(updateClock, 1000);
+        updateCaregiverDisplay();
+    </script>
+</body>
+</html>

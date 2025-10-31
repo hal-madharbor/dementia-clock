@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Clock">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <title>Activity Clock</title>
+</head>
+<body>
+    <!-- Button stack on left side -->
+    <div class="button-stack" id="buttonStack">
+        <button class="stack-button" id="settingsBtn" title="Settings">⚙️</button>
+        <button class="stack-button" id="infoBtn" title="Press and hold for caregiver info">ℹ️</button>
+        <button class="stack-button" id="caregiverToggle" title="Change caregiver">👤</button>
+        <button class="stack-button medication-btn" id="medicationBtn" title="View medication schedule">💊</button>
+    </div>
+
+    <!-- Home button (appears on panels) -->
+    <button class="home-btn" id="homeBtn" title="Return to clock">🏠</button>
+
+    <div class="container" id="clockDisplay">
+        <div class="photos-section">
+            <div class="photo-card">
+                <div class="photo" id="patientPhoto">I</div>
+                <div class="photo-name" id="patientName">Ilona</div>
+            </div>
+            <div class="photo-card">
+                <div class="photo" id="spousePhoto">H</div>
+                <div class="photo-name" id="spouseName">Hal</div>
+            </div>
+            <div class="photo-card" id="caregiverCard" style="display: none;">
+                <div class="photo" id="caregiverPhoto">C</div>
+                <div class="photo-name" id="caregiverName">Caregiver</div>
+            </div>
+        </div>
+        
+        <div class="datetime-row">
+            <span class="time" id="time"></span>
+            <div class="period-day-stack">
+                <span id="period"></span>
+                <span id="day"></span>
+            </div>
+        </div>
+        <div class="activity" id="activity"></div>
+    </div>
+
+    <div class="caregiver-info-panel" id="caregiverInfoPanel">
+        <div id="infoContent"></div>
+    </div>
+
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">⚙️ Clock Settings</div>
+        
+        <div class="settings-tabs">
+            <button class="tab active" data-tab="personal">Personal Info</button>
+            <button class="tab" data-tab="schedule">Daily Schedule</button>
+            <button class="tab" data-tab="caregivers">Caregivers</button>
+            <button class="tab" data-tab="caregiverinfo">Caregiver Info</button>
+            <button class="tab" data-tab="events">Special Events</button>
+            <button class="tab" data-tab="popups">Pop-up Tasks</button>
+            <button class="tab" data-tab="medications">Medications</button>
+            <button class="tab" data-tab="help">Help</button>
+        </div>
+        
+        <div class="settings-content">
+            <div class="tab-panel active" id="personal">
+                <h2>Personal Information</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Patient First Name</label>
+                    <input type="text" class="form-input" id="firstName" placeholder="Legal first name">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Patient Last Name</label>
+                    <input type="text" class="form-input" id="lastName" placeholder="Legal last name">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Display Name (shown on clock)</label>
+                    <input type="text" class="form-input" id="displayName" placeholder="Nickname or preferred name">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Patient Photo</label>
+                    <div class="photo-upload-section">
+                        <div class="photo-preview" id="patientPhotoPreview">P</div>
+                        <img id="patientPhotoImg" class="photo-preview" style="display:none;" alt="Patient">
+                        <input type="file" id="patientPhotoInput" accept="image/*" style="display:none;">
+                        <div class="photo-buttons">
+                            <button class="btn btn-secondary" id="patientPhotoChoose">📁 Choose Photo</button>
+                            <button class="btn btn-secondary" id="patientPhotoRemove">🗑️ Remove</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Primary Caregiver Full Name</label>
+                    <input type="text" class="form-input" id="primaryCaregiverName" placeholder="Legal full name">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Display Name (shown on clock)</label>
+                    <input type="text" class="form-input" id="primaryCaregiverDisplayName" placeholder="Nickname or preferred name">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Primary Caregiver Relationship</label>
+                    <input type="text" class="form-input" id="primaryCaregiverRelationship" placeholder="e.g., Spouse, Daughter, Son, Partner">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Primary Caregiver Phone</label>
+                    <input type="tel" class="form-input" id="primaryCaregiverPhone" placeholder="Phone number">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Primary Caregiver Photo</label>
+                    <div class="photo-upload-section">
+                        <div class="photo-preview" id="primaryCaregiverPhotoPreview">C</div>
+                        <img id="primaryCaregiverPhotoImg" class="photo-preview" style="display:none;" alt="Caregiver">
+                        <input type="file" id="primaryCaregiverPhotoInput" accept="image/*" style="display:none;">
+                        <div class="photo-buttons">
+                            <button class="btn btn-secondary" id="primaryCaregiverPhotoChoose">📁 Choose Photo</button>
+                            <button class="btn btn-secondary" id="primaryCaregiverPhotoRemove">🗑️ Remove</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-panel" id="schedule">
+                <h2>Daily Activity Schedule</h2>
+                <p style="margin-bottom: 1rem; color: #666;">Set the times for each daily activity.</p>
+                
+                <div class="schedule-grid">
+                    <div class="schedule-item">
+                        <label class="form-label">Start</label>
+                        <label class="form-label">End</label>
+                        <label class="form-label">Activity</label>
+                    </div>
+                    <div class="schedule-item">
+                        <input type="time" class="form-input" value="06:00">
+                        <input type="time" class="form-input" value="09:00">
+                        <input type="text" class="form-input" value="Breakfast Time">
+                    </div>
+                    <div class="schedule-item">
+                        <input type="time" class="form-input" value="09:00">
+                        <input type="time" class="form-input" value="12:00">
+                        <input type="text" class="form-input" value="Morning Time">
+                    </div>
+                    <div class="schedule-item">
+                        <input type="time" class="form-input" value="12:00">
+                        <input type="time" class="form-input" value="13:00">
+                        <input type="text" class="form-input" value="Lunch Time">
+                    </div>
+                    <div class="schedule-item">
+                        <input type="time" class="form-input" value="13:00">
+                        <input type="time" class="form-input" value="17:00">
+                        <input type="text" class="form-input" value="Afternoon Time">
+                    </div>
+                    <div class="schedule-item">
+                        <input type="time" class="form-input" value="17:00">
+                        <input type="time" class="form-input" value="19:00">
+                        <input type="text" class="form-input" value="Dinner Time">
+                    </div>
+                    <div class="schedule-item">
+                        <input type="time" class="form-input" value="19:00">
+                        <input type="time" class="form-input" value="22:00">
+                        <input type="text" class="form-input" value="Evening Time">
+                    </div>
+                    <div class="schedule-item">
+                        <input type="time" class="form-input" value="22:00">
+                        <input type="time" class="form-input" value="06:00">
+                        <input type="text" class="form-input" value="Sleep Time">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-panel" id="caregivers">
+                <h2>Additional Caregivers</h2>
+                <p style="margin-bottom: 1rem; color: #666;">Add other people who help with care. Use the 👤 button on the clock to display who is currently helping.</p>
+                
+                <div class="caregiver-list"></div>
+                
+                <button class="btn btn-primary" id="addCaregiverBtn" style="margin-top: 1rem;">+ Add Caregiver</button>
+                
+                <div style="margin-top: 2rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem; color: #666;">
+                    <strong>Note:</strong> Display names are what appear on the clock. Full names are for records and emergency contacts.
+                </div>
+            </div>
+            
+            <div class="tab-panel" id="caregiverinfo">
+                <h2>Caregiver Reference Information</h2>
+                <p style="margin-bottom: 1.5rem; color: #666;">Emergency contacts, medical team, and important information for caregivers.</p>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Emergency Contacts</h3>
+                <div class="form-group">
+                    <label class="form-label">Primary Emergency Contact</label>
+                    <input type="text" class="form-input" id="emergencyContact1Name" placeholder="Name">
+                    <input type="tel" class="form-input" style="margin-top: 0.5rem;" id="emergencyContact1Phone" placeholder="Phone Number">
+                    <textarea class="form-input" style="margin-top: 0.5rem;" id="emergencyContact1Note" rows="3" placeholder="Note (relationship, when to call, etc.)"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Secondary Emergency Contact</label>
+                    <input type="text" class="form-input" id="emergencyContact2Name" placeholder="Name">
+                    <input type="tel" class="form-input" style="margin-top: 0.5rem;" id="emergencyContact2Phone" placeholder="Phone Number">
+                    <textarea class="form-input" style="margin-top: 0.5rem;" id="emergencyContact2Note" rows="3" placeholder="Note (relationship, when to call, etc.)"></textarea>
+                </div>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Medical Team</h3>
+                <div class="form-group">
+                    <label class="form-label">Primary Physician</label>
+                    <input type="text" class="form-input" id="primaryPhysicianName" placeholder="Dr. Name">
+                    <input type="tel" class="form-input" style="margin-top: 0.5rem;" id="primaryPhysicianPhone" placeholder="Phone Number">
+                    <textarea class="form-input" style="margin-top: 0.5rem;" id="primaryPhysicianNote" rows="3" placeholder="Note (specialty, office hours, etc.)"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Preferred Hospital</label>
+                    <textarea class="form-input" id="preferredHospital" rows="2" placeholder="Hospital name and address"></textarea>
+                </div>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Legal & Directives</h3>
+                <div class="form-group">
+                    <label class="form-label">Power of Attorney</label>
+                    <input type="text" class="form-input" id="poaName" placeholder="Name">
+                    <input type="tel" class="form-input" style="margin-top: 0.5rem;" id="poaPhone" placeholder="Phone Number">
+                    <textarea class="form-input" style="margin-top: 0.5rem;" id="poaNote" rows="3" placeholder="Note (type of POA, document location, etc.)"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">DNR Status</label>
+                    <select class="form-input" id="dnrStatus">
+                        <option value="">Select...</option>
+                        <option value="Yes">Yes - DNR on file</option>
+                        <option value="No">No - Full resuscitation</option>
+                    </select>
+                </div>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Medical Information</h3>
+                <div class="form-group">
+                    <label class="form-label">Known Allergies</label>
+                    <textarea class="form-input" id="allergies" rows="3" placeholder="List any allergies"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Current Diagnoses/Conditions</label>
+                    <textarea class="form-input" id="conditions" rows="3" placeholder="List current medical conditions"></textarea>
+                </div>
+            </div>
+            
+            <div class="tab-panel" id="events">
+                <h2>Special Events & Holidays</h2>
+                <p style="margin-bottom: 1rem; color: #666;">Coming in Phase 3</p>
+            </div>
+            
+            <div class="tab-panel" id="popups">
+                <h2>Pop-up Task Reminders</h2>
+                <p style="margin-bottom: 1rem; color: #666;">Coming in Phase 4</p>
+            </div>
+            
+            <div class="tab-panel" id="medications">
+                <h2>Medication Schedule</h2>
+                <p style="margin-bottom: 1.5rem; color: #666;">Set medication times. A reminder (💊 icon and border) will appear 30 minutes before each scheduled time.</p>
+                
+                <div class="medication-list" id="medicationList"></div>
+                
+                <button class="btn btn-primary" id="addMedicationBtn" style="margin-top: 1rem;">+ Add Medication Time</button>
+                
+                <div style="margin-top: 2rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem; color: #666;">
+                    <strong>How it works:</strong>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem; line-height: 1.6;">
+                        <li>💊 button always visible - tap anytime to view medication schedule</li>
+                        <li>Reminder appears 30 minutes before scheduled time</li>
+                        <li>💊 icon turns bright orange and pulses</li>
+                        <li>Screen gets noticeable orange border</li>
+                        <li>Tap 💊 button to view medication details</li>
+                        <li>Reminder auto-dismisses 30 minutes after scheduled time</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="tab-panel" id="help">
+                <h2 style="color: #1a1a1a;">Help & Information</h2>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Understanding Data Storage</h3>
+                <p style="margin-bottom: 1rem; color: #374151;">Your settings are saved automatically to your device's browser storage (localStorage). This means:</p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem; line-height: 1.6; color: #374151;">
+                    <li><strong>Privacy:</strong> Your information never leaves your device - no server sees or stores your data</li>
+                    <li><strong>Browser-specific:</strong> Each browser has separate settings (iPad Safari ≠ MacBook Safari)</li>
+                    <li><strong>Device-specific:</strong> Settings on one device don't sync to others</li>
+                </ul>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #ef4444;">⚠️ Important Warning</h3>
+                <p style="margin-bottom: 1rem; padding: 1rem; background: #fee2e2; border-radius: 0.5rem; color: #991b1b;">
+                    <strong>Clearing browser data will DELETE all your settings!</strong> This includes all names, photos, schedules, and customizations.
+                </p>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Protect Your Settings</h3>
+                <p style="margin-bottom: 1rem; color: #374151;"><strong>Export regularly as backup:</strong></p>
+                <ol style="margin-left: 2rem; margin-bottom: 1rem; line-height: 1.6; color: #374151;">
+                    <li>Click "💾 Export" button (below)</li>
+                    <li>File named <code style="background: #f3f4f6; padding: 0.2rem 0.4rem; border-radius: 0.25rem;">clock-settings.json</code> downloads</li>
+                    <li>Save it somewhere safe (email to yourself, iCloud Drive, computer)</li>
+                    <li>To restore: Click "📂 Import" and select your backup file</li>
+                </ol>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Troubleshooting</h3>
+                <p style="margin-bottom: 0.5rem; color: #374151;"><strong>Settings won't save:</strong></p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem; line-height: 1.6; color: #374151;">
+                    <li>Make sure you clicked "Save" button</li>
+                    <li>Check Settings → Safari → Block All Cookies is OFF</li>
+                </ul>
+                
+                <p style="margin-top: 2rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem; color: #666;">
+                    <strong>Version:</strong> 2.1 (Phase 5 Complete + Button Stack)<br>
+                    <strong>Last Updated:</strong> October 2025
+                </p>
+            </div>
+        </div>
+        
+        <div class="settings-actions">
+            <button class="btn btn-secondary" id="exportBtn">💾 Export</button>
+            <button class="btn btn-secondary" id="importBtn">📂 Import</button>
+            <button class="btn btn-danger" id="resetBtn">🔄 Reset</button>
+            <button class="btn btn-secondary" id="cancelBtn">✕ Cancel</button>
+            <button class="btn btn-primary" id="saveBtn">✓ Save</button>
+        </div>
+    </div>
+
+
+    <!-- Load JavaScript modules in dependency order -->
+    <script src="js/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/photos.js"></script>
+    <script src="js/clock.js"></script>
+    <script src="js/caregivers.js"></script>
+    <script src="js/medications.js"></script>
+    <script src="js/settings-ui.js"></script>
+    <script src="js/info-panel.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

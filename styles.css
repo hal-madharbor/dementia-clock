@@ -69,10 +69,30 @@ body {
     color: white;
 }
 
-/* Medication active border and background on body */
-body.medication-active {
-    border: 16px solid #f97316;
-    background-color: rgba(251, 146, 60, 0.08);
+/* Medication alerts - two stages */
+
+/* Warning phase: 30 min before → exact time (yellow-orange, solid) */
+body.medication-warning {
+    border: 16px solid #fbbf24;
+    background-color: rgba(251, 191, 36, 0.06);
+}
+
+/* Action phase: exact time → 30 min after (RED, pulsing) */
+body.medication-action {
+    border: 16px solid #ef4444;
+    background-color: rgba(239, 68, 68, 0.08);
+    animation: medication-pulse 2s ease-in-out infinite;
+}
+
+@keyframes medication-pulse {
+    0%, 100% {
+        border-color: #ef4444;
+        border-width: 16px;
+    }
+    50% {
+        border-color: #dc2626;
+        border-width: 18px;
+    }
 }
 
 /* ============================================================================

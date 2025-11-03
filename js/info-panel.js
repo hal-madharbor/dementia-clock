@@ -29,6 +29,42 @@ function renderCaregiverInfo() {
     const content = document.getElementById('infoContent');
     let html = '';
     
+    // Care Team Section (NEW - appears first)
+    html += '<div class="info-section">';
+    html += '<div class="info-section-title">👥 Care Team</div>';
+    
+    // Primary Caregiver
+    html += '<div class="info-item">';
+    html += '<div class="info-item-label">Primary Caregiver</div>';
+    html += '<div class="info-item-value">' + settings.primaryCaregiver.name;
+    if (settings.primaryCaregiver.relationship) {
+        html += ' <span style="color: #6b7280;">(' + settings.primaryCaregiver.relationship + ')</span>';
+    }
+    html += '</div>';
+    if (settings.primaryCaregiver.phone) {
+        html += '<div class="info-item-value"><a href="tel:' + settings.primaryCaregiver.phone + '">' + settings.primaryCaregiver.phone + '</a></div>';
+    }
+    html += '</div>';
+    
+    // Additional Caregivers
+    if (settings.additionalCaregivers && settings.additionalCaregivers.length > 0) {
+        settings.additionalCaregivers.forEach(caregiver => {
+            html += '<div class="info-item">';
+            html += '<div class="info-item-label">Additional Caregiver</div>';
+            html += '<div class="info-item-value">' + caregiver.name;
+            if (caregiver.relationship) {
+                html += ' <span style="color: #6b7280;">(' + caregiver.relationship + ')</span>';
+            }
+            html += '</div>';
+            if (caregiver.phone) {
+                html += '<div class="info-item-value"><a href="tel:' + caregiver.phone + '">' + caregiver.phone + '</a></div>';
+            }
+            html += '</div>';
+        });
+    }
+    
+    html += '</div>';
+    
     // Emergency Contacts Section
     html += '<div class="info-section">';
     html += '<div class="info-section-title">🚨 Emergency Contacts</div>';

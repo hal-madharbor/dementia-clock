@@ -128,7 +128,8 @@ function checkMedicationReminders() {
     const currentMinutes = now.getMinutes();
     const currentTimeInMinutes = currentHours * 60 + currentMinutes;
     
-    let shouldShowReminder = false;
+    let isWarningPhase = false;  // 30 min before → exact time
+    let isActionPhase = false;   // Exact time → 30 min after
     
     if (settings.medications && settings.medications.length > 0) {
         settings.medications.forEach(med => {
@@ -136,22 +137,38 @@ function checkMedicationReminders() {
                 const [medHours, medMinutes] = med.time.split(':').map(Number);
                 const medTimeInMinutes = medHours * 60 + medMinutes;
                 
-                // Show reminder 30 minutes before until 30 minutes after
-                const startWindow = medTimeInMinutes - 30;
-                const endWindow = medTimeInMinutes + 30;
+                // Warning phase: 30 minutes before until exact time
+                const warningStart = medTimeInMinutes - 30;
+                const warningEnd = medTimeInMinutes;
                 
-                if (currentTimeInMinutes >= startWindow && currentTimeInMinutes <= endWindow) {
-                    shouldShowReminder = true;
+                // Action phase: Exact time until 30 minutes after
+                const actionStart = medTimeInMinutes;
+                const actionEnd = medTimeInMinutes + 30;
+                
+                if (currentTimeInMinutes >= warningStart && currentTimeInMinutes < actionStart) {
+                    isWarningPhase = true;
+                }
+                
+                if (currentTimeInMinutes >= actionStart && currentTimeInMinutes <= actionEnd) {
+                    isActionPhase = true;
                 }
             }
         });
     }
     
-    // Apply visual reminder (border + background tint)
-    if (shouldShowReminder) {
-        document.body.classList.add('medication-active');
+    // Apply appropriate visual reminder
+    if (isActionPhase) {
+        // Action phase: RED + PULSING
+        document.body.classList.remove('medication-warning');
+        document.body.classList.add('medication-action');
+    } else if (isWarningPhase) {
+        // Warning phase: Yellow-orange solid
+        document.body.classList.remove('medication-action');
+        document.body.classList.add('medication-warning');
     } else {
-        document.body.classList.remove('medication-active');
+        // No reminder
+        document.body.classList.remove('medication-warning');
+        document.body.classList.remove('medication-action');
     }
 }
 

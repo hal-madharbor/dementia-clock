@@ -147,12 +147,10 @@ function checkMedicationReminders() {
         });
     }
     
-    const medicationBtn = document.getElementById('medicationBtn');
+    // Apply visual reminder (border + background tint)
     if (shouldShowReminder) {
-        medicationBtn.classList.add('active');
         document.body.classList.add('medication-active');
     } else {
-        medicationBtn.classList.remove('active');
         document.body.classList.remove('medication-active');
     }
 }

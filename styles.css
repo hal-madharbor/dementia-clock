@@ -69,29 +69,7 @@ body {
     color: white;
 }
 
-/* Medication button styling */
-.medication-btn {
-    transition: all 0.3s;
-}
-
-.medication-btn.active {
-    background: #fb923c;
-    border-color: #f97316;
-    animation: pulse 2s ease-in-out infinite;
-    box-shadow: 0 4px 12px rgba(251, 146, 60, 0.4);
-}
-
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(1.05);
-        opacity: 0.9;
-    }
-}
-
+/* Medication active border and background on body */
 body.medication-active {
     border: 16px solid #f97316;
     background-color: rgba(251, 146, 60, 0.08);

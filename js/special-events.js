@@ -22,11 +22,11 @@ function getTodayEvent() {
 function getEventDisplayText(event) {
     if (!event) return null;
     
-    // Format based on event type
+    // Format: One emoji at start, then just the event name
     const emoji = event.type === 'birthday' ? '🎂' : 
                   event.type === 'anniversary' ? '💕' : '🎉';
     
-    return `${emoji} Today is ${event.name}! ${emoji}`;
+    return `${emoji} ${event.name}`;
 }
 
 function renderSpecialEventsList() {

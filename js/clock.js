@@ -56,7 +56,7 @@ function updateClock() {
     document.getElementById('day').textContent = dayName;
     document.getElementById('time').textContent = timeStr;
     document.getElementById('period').textContent = periodStr;
-    document.getElementById('activity').textContent = activity;
+    document.getElementById('activityLabel').textContent = activity;
     
     // Check for special event today
     const todayEvent = getTodayEvent();

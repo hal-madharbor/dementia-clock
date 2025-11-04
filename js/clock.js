@@ -57,6 +57,17 @@ function updateClock() {
     document.getElementById('time').textContent = timeStr;
     document.getElementById('period').textContent = periodStr;
     document.getElementById('activity').textContent = activity;
+    
+    // Check for special event today
+    const todayEvent = getTodayEvent();
+    const specialEventEl = document.getElementById('specialEvent');
+    if (todayEvent) {
+        specialEventEl.textContent = getEventDisplayText(todayEvent);
+        specialEventEl.style.display = 'block';
+    } else {
+        specialEventEl.style.display = 'none';
+    }
+    
     document.body.className = bgClass;
     
     // Re-check medication reminders

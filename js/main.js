@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeClock();
     initializeCaregiverToggle();
     initializeMedicationHandlers();
+    initializeSpecialEventsHandlers();
     initializeSettingsHandlers();
     initializeInfoPanelHandlers();
     

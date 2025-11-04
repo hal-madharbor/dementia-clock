@@ -57,6 +57,9 @@ function loadSettings() {
                 if (!cg.displayName) cg.displayName = cg.name;
                 if (!cg.photo) cg.photo = null;
             });
+            if (!loaded.specialEvents) {
+                loaded.specialEvents = [];
+            }
             return loaded;
         }
     } catch (error) {

@@ -45,7 +45,8 @@ const DEFAULT_SETTINGS = {
             conditions: ""
         }
     },
-    medications: []
+    medications: [],
+    specialEvents: []
 };
 
 // Declare settings variable - will be initialized in main.js after storage.js loads

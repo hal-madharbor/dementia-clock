@@ -63,6 +63,9 @@ function loadSettingsIntoForm() {
     
     // Medications
     renderMedicationList();
+    
+    // Special Events
+    renderSpecialEventsList();
 }
 
 function saveFormToSettings() {

@@ -46,6 +46,7 @@
             </div>
         </div>
         <div class="activity" id="activity"></div>
+        <div class="special-event" id="specialEvent"></div>
     </div>
 
     <div class="caregiver-info-panel" id="caregiverInfoPanel">
@@ -251,8 +252,22 @@
             </div>
             
             <div class="tab-panel" id="events">
-                <h2>Special Events & Holidays</h2>
-                <p style="margin-bottom: 1rem; color: #666;">Coming in Phase 3</p>
+                <h2>Special Events</h2>
+                <p style="margin-bottom: 1.5rem; color: #666;">Add birthdays, anniversaries, and other special occasions. They will appear on the home screen on the actual day.</p>
+                
+                <div class="special-events-list" id="specialEventsList"></div>
+                
+                <button class="btn btn-primary" id="addEventBtn" style="margin-top: 1rem;">+ Add Special Event</button>
+                
+                <div style="margin-top: 2rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem; color: #666;">
+                    <strong>How it works:</strong>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem; line-height: 1.6;">
+                        <li>Events repeat every year automatically</li>
+                        <li>Only one event displays per day (if multiple, first one shows)</li>
+                        <li>Appears below the activity label on the home screen</li>
+                        <li>Shown in gold/amber color to make it special</li>
+                    </ul>
+                </div>
             </div>
             
             <div class="tab-panel" id="popups">
@@ -337,6 +352,7 @@
     <script src="js/clock.js"></script>
     <script src="js/caregivers.js"></script>
     <script src="js/medications.js"></script>
+    <script src="js/special-events.js"></script>
     <script src="js/settings-ui.js"></script>
     <script src="js/info-panel.js"></script>
     <script src="js/main.js"></script>

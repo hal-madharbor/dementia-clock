@@ -645,3 +645,207 @@ body.medication-action {
 .hidden {
     display: none;
 }
+
+/* ============================================================================
+   SPECIAL EVENTS TABLE STYLES - ADD TO EXISTING styles.css
+   ============================================================================ */
+
+/* Sub-tabs for special events categories */
+.special-events-subtabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.special-events-subtabs .subtab {
+    flex: 1;
+    min-width: 150px;
+    padding: 0.75rem 1rem;
+    background: #f3f4f6;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    color: #374151;
+}
+
+.special-events-subtabs .subtab:hover {
+    background: #e5e7eb;
+    border-color: #d1d5db;
+}
+
+.special-events-subtabs .subtab.active {
+    background: #1a1a1a;
+    border-color: #1a1a1a;
+    color: white;
+}
+
+.subtab-content {
+    display: none;
+}
+
+.subtab-content.active {
+    display: block;
+}
+
+/* Events table styling */
+.events-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    background: white;
+}
+
+.events-table thead {
+    background: #f3f4f6;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+}
+
+.events-table th,
+.events-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.events-table th:last-child,
+.events-table td:last-child {
+    text-align: right;
+}
+
+.events-table tbody tr {
+    transition: background 0.2s;
+}
+
+.events-table tbody tr:not(.note-row):not(.editing):hover {
+    background: #f9fafb;
+}
+
+.events-table tbody tr.editing {
+    background: #fef3c7;
+}
+
+.events-table .note-row {
+    border-top: none;
+}
+
+.events-table .note-row td {
+    padding-top: 0;
+    padding-bottom: 0.75rem;
+}
+
+/* Table action buttons */
+.events-table .btn-edit,
+.events-table .btn-delete,
+.events-table .btn-save,
+.events-table .btn-cancel {
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+    margin-left: 0.25rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 0.25rem;
+}
+
+.events-table .btn-edit:hover {
+    background: #e5e7eb;
+}
+
+.events-table .btn-delete {
+    color: #ef4444;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.events-table .btn-delete:hover {
+    background: #fee2e2;
+}
+
+.events-table .btn-save {
+    background: #10b981;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.events-table .btn-save:hover {
+    background: #059669;
+}
+
+.events-table .btn-cancel {
+    background: #6b7280;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.events-table .btn-cancel:hover {
+    background: #4b5563;
+}
+
+/* Inline editing inputs */
+.events-table .editing .form-input {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 0.95rem;
+    border: 2px solid #d1d5db;
+    border-radius: 0.25rem;
+}
+
+.events-table .editing .form-input:focus {
+    outline: none;
+    border-color: #1a1a1a;
+}
+
+/* Empty state */
+.events-table tbody td[colspan] {
+    text-align: center;
+    font-style: italic;
+}
+
+/* Special events display on main clock */
+#specialEvents {
+    display: none;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: #1a1a1a;
+    padding: 1rem 2rem;
+    border-radius: 1rem;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.bg-night #specialEvents {
+    color: #1a1a1a;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .special-events-subtabs {
+        flex-direction: column;
+    }
+    
+    .special-events-subtabs .subtab {
+        min-width: 100%;
+    }
+    
+    .events-table th,
+    .events-table td {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .events-table .btn-edit,
+    .events-table .btn-delete {
+        font-size: 0.875rem;
+    }
+}

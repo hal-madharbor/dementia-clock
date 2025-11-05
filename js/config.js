@@ -46,7 +46,20 @@ const DEFAULT_SETTINGS = {
         }
     },
     medications: [],
-    specialEvents: []
+    specialEvents: {
+        birthdays: [
+            // { name: "Sarah", month: 3, day: 15, year: 1983, note: "" }
+        ],
+        annualHolidays: [
+            // { name: "Christmas", month: 12, day: 25, note: "" }
+        ],
+        floatingHolidays: [
+            // { name: "Thanksgiving", month: 11, day: 28, year: 2025, note: "" }
+        ],
+        specialOccasions: [
+            // { name: "Anniversary", month: 6, day: 14, year: 1975, note: "Wedding day" }
+        ]
+    }
 };
 
 // Declare settings variable - will be initialized in main.js after storage.js loads

@@ -2,6 +2,7 @@
 // DEMENTIA CLOCK - STORAGE MODULE
 // ============================================================================
 // Handles all localStorage operations: save, load, export, import, reset
+// Includes backward compatibility for special events migration
 
 function saveSettings() {
     try {
@@ -57,9 +58,86 @@ function loadSettings() {
                 if (!cg.displayName) cg.displayName = cg.name;
                 if (!cg.photo) cg.photo = null;
             });
-            if (!loaded.specialEvents) {
-                loaded.specialEvents = [];
+            
+            // Migrate old special events format to new format
+            if (loaded.specialEvents) {
+                // Check if it's the old format (arrays with date strings)
+                if (loaded.specialEvents.birthdays && loaded.specialEvents.birthdays.length > 0) {
+                    const firstBirthday = loaded.specialEvents.birthdays[0];
+                    if (typeof firstBirthday.date === 'string') {
+                        // Old format detected - migrate
+                        console.log('Migrating special events to new format...');
+                        
+                        const newSpecialEvents = {
+                            birthdays: [],
+                            annualHolidays: [],
+                            floatingHolidays: [],
+                            specialOccasions: []
+                        };
+                        
+                        // Migrate old birthdays
+                        if (loaded.specialEvents.birthdays) {
+                            loaded.specialEvents.birthdays.forEach(event => {
+                                const [month, day, year] = event.date.split('/').map(Number);
+                                newSpecialEvents.birthdays.push({
+                                    name: event.name,
+                                    month: month,
+                                    day: day,
+                                    year: year || null,
+                                    note: event.note || ""
+                                });
+                            });
+                        }
+                        
+                        // Migrate old holidays (assume annual unless has year)
+                        if (loaded.specialEvents.holidays) {
+                            loaded.specialEvents.holidays.forEach(event => {
+                                const parts = event.date.split('/').map(Number);
+                                const month = parts[0];
+                                const day = parts[1];
+                                const year = parts[2];
+                                
+                                if (year) {
+                                    // Has year - floating holiday
+                                    newSpecialEvents.floatingHolidays.push({
+                                        name: event.name,
+                                        month: month,
+                                        day: day,
+                                        year: year,
+                                        note: event.note || ""
+                                    });
+                                } else {
+                                    // No year - annual holiday
+                                    newSpecialEvents.annualHolidays.push({
+                                        name: event.name,
+                                        month: month,
+                                        day: day,
+                                        note: event.note || ""
+                                    });
+                                }
+                            });
+                        }
+                        
+                        loaded.specialEvents = newSpecialEvents;
+                        console.log('Migration complete');
+                    }
+                }
             }
+            
+            // Ensure new special events structure exists
+            if (!loaded.specialEvents) {
+                loaded.specialEvents = {
+                    birthdays: [],
+                    annualHolidays: [],
+                    floatingHolidays: [],
+                    specialOccasions: []
+                };
+            }
+            if (!loaded.specialEvents.birthdays) loaded.specialEvents.birthdays = [];
+            if (!loaded.specialEvents.annualHolidays) loaded.specialEvents.annualHolidays = [];
+            if (!loaded.specialEvents.floatingHolidays) loaded.specialEvents.floatingHolidays = [];
+            if (!loaded.specialEvents.specialOccasions) loaded.specialEvents.specialOccasions = [];
+            
             return loaded;
         }
     } catch (error) {
@@ -96,16 +174,20 @@ function importSettings(file) {
     reader.onload = (event) => {
         try {
             const imported = JSON.parse(event.target.result);
-            if (confirm('Import settings?')) {
+            if (confirm('Import settings? This will replace your current settings.')) {
                 settings = imported;
+                
+                // Run through load logic to ensure compatibility
+                settings = loadSettings();
+                
                 saveSettings();
                 loadSettingsIntoForm();
                 updateClock();
                 updateCaregiverDisplay();
-                alert('Imported!');
+                alert('Settings imported successfully!');
             }
         } catch (error) {
-            alert('Error importing.');
+            alert('Error importing. Make sure this is a valid settings file.');
         }
     };
     reader.readAsText(file);

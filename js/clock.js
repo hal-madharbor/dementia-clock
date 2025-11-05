@@ -1,7 +1,7 @@
 // ============================================================================
 // DEMENTIA CLOCK - CLOCK DISPLAY MODULE
 // ============================================================================
-// Handles time display, day of week, activity labels, and background colors
+// Handles time display, day of week, activity labels, background colors, and special events
 
 function timeToHour(timeStr) {
     const [hours, minutes] = timeStr.split(':').map(Number);
@@ -35,6 +35,83 @@ function getBackgroundColor(hours) {
     return 'bg-night';
 }
 
+function checkSpecialEvents() {
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;  // 1-12
+    const currentDay = now.getDate();
+    const currentYear = now.getFullYear();
+    
+    let events = [];
+    
+    // Check birthdays
+    if (settings.specialEvents && settings.specialEvents.birthdays) {
+        settings.specialEvents.birthdays.forEach(birthday => {
+            if (birthday.month === currentMonth && birthday.day === currentDay) {
+                let displayText = `${birthday.name}'s Birthday`;
+                if (birthday.year) {
+                    const age = currentYear - birthday.year;
+                    displayText += ` (turns ${age})`;
+                }
+                events.push(displayText);
+            }
+        });
+    }
+    
+    // Check annual holidays
+    if (settings.specialEvents && settings.specialEvents.annualHolidays) {
+        settings.specialEvents.annualHolidays.forEach(holiday => {
+            if (holiday.month === currentMonth && holiday.day === currentDay) {
+                events.push(holiday.name);
+            }
+        });
+    }
+    
+    // Check floating holidays (must match year too)
+    if (settings.specialEvents && settings.specialEvents.floatingHolidays) {
+        settings.specialEvents.floatingHolidays.forEach(holiday => {
+            if (holiday.month === currentMonth && 
+                holiday.day === currentDay && 
+                holiday.year === currentYear) {
+                events.push(holiday.name);
+            }
+        });
+    }
+    
+    // Check special occasions
+    if (settings.specialEvents && settings.specialEvents.specialOccasions) {
+        settings.specialEvents.specialOccasions.forEach(occasion => {
+            if (occasion.month === currentMonth && occasion.day === currentDay) {
+                let displayText = occasion.name;
+                if (occasion.year) {
+                    const years = currentYear - occasion.year;
+                    if (years > 0) {
+                        // Determine suffix (st, nd, rd, th)
+                        const suffix = (years === 1) ? 'st' : 
+                                      (years === 2) ? 'nd' : 
+                                      (years === 3) ? 'rd' : 'th';
+                        displayText = `${years}${suffix} ${occasion.name}`;
+                    }
+                }
+                events.push(displayText);
+            }
+        });
+    }
+    
+    return events;
+}
+
+function renderSpecialEvents() {
+    const events = checkSpecialEvents();
+    const specialEventsDiv = document.getElementById('specialEvents');
+    
+    if (events.length > 0) {
+        specialEventsDiv.style.display = 'block';
+        specialEventsDiv.innerHTML = '🎉 Today is ' + events.join(' and ') + '!';
+    } else {
+        specialEventsDiv.style.display = 'none';
+    }
+}
+
 function updateClock() {
     const now = new Date();
     const hours = now.getHours();
@@ -56,19 +133,11 @@ function updateClock() {
     document.getElementById('day').textContent = dayName;
     document.getElementById('time').textContent = timeStr;
     document.getElementById('period').textContent = periodStr;
-    document.getElementById('activityLabel').textContent = activity;
-    
-    // Check for special event today
-    const todayEvent = getTodayEvent();
-    const specialEventEl = document.getElementById('specialEvent');
-    if (todayEvent) {
-        specialEventEl.textContent = getEventDisplayText(todayEvent);
-        specialEventEl.style.display = 'block';
-    } else {
-        specialEventEl.style.display = 'none';
-    }
-    
+    document.getElementById('activity').textContent = activity;
     document.body.className = bgClass;
+    
+    // Update special events
+    renderSpecialEvents();
     
     // Re-check medication reminders
     checkMedicationReminders();

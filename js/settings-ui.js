@@ -64,8 +64,7 @@ function loadSettingsIntoForm() {
     // Medications
     renderMedicationList();
     
-    // Special Events
-    renderSpecialEventsList();
+    // Special Events - removed old call, now renders when tab clicked
 }
 
 function saveFormToSettings() {
@@ -222,6 +221,11 @@ function initializeSettingsHandlers() {
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
             tab.classList.add('active');
             document.getElementById(tab.dataset.tab).classList.add('active');
+            
+            // Render special events tab when activated
+            if (tab.dataset.tab === 'events') {
+                renderSpecialEventsTab();
+            }
         });
     });
     

@@ -24,6 +24,9 @@
     <button class="home-btn" id="homeBtn" title="Return to clock">🏠</button>
 
     <div class="container" id="clockDisplay">
+        <!-- Special Events Display (shows when events active) -->
+        <div id="specialEvents" style="display: none;"></div>
+        
         <div class="photos-section">
             <div class="photo-card">
                 <div class="photo" id="patientPhoto">I</div>
@@ -39,20 +42,14 @@
             </div>
         </div>
         
-        <!-- New horizontal time row: Activity | Time/Period | Day -->
-        <div class="time-row">
-            <div class="activity-emphasis" id="activity">Morning</div>
-            <div class="time-stack">
-                <div class="time" id="time">10:30</div>
-                <div class="period" id="period">AM</div>
+        <div class="datetime-row">
+            <span class="time" id="time"></span>
+            <div class="period-day-stack">
+                <span id="period"></span>
+                <span id="day"></span>
             </div>
-            <div class="day" id="day">Wed</div>
         </div>
-        
-        <!-- Special events and medication alerts area -->
-        <div class="alerts-area">
-            <div id="specialEvents" style="display: none;"></div>
-        </div>
+        <div class="activity" id="activity"></div>
     </div>
 
     <div class="caregiver-info-panel" id="caregiverInfoPanel">
@@ -141,7 +138,7 @@
             
             <div class="tab-panel" id="schedule">
                 <h2>Daily Activity Schedule</h2>
-                <p style="margin-bottom: 1rem; color: #666;">Set the times for each daily activity. Use single words for activity labels.</p>
+                <p style="margin-bottom: 1rem; color: #666;">Set the times for each daily activity.</p>
                 
                 <div class="schedule-grid">
                     <div class="schedule-item">
@@ -152,37 +149,37 @@
                     <div class="schedule-item">
                         <input type="time" class="form-input" value="06:00">
                         <input type="time" class="form-input" value="09:00">
-                        <input type="text" class="form-input" value="Breakfast">
+                        <input type="text" class="form-input" value="Breakfast Time">
                     </div>
                     <div class="schedule-item">
                         <input type="time" class="form-input" value="09:00">
                         <input type="time" class="form-input" value="12:00">
-                        <input type="text" class="form-input" value="Morning">
+                        <input type="text" class="form-input" value="Morning Time">
                     </div>
                     <div class="schedule-item">
                         <input type="time" class="form-input" value="12:00">
                         <input type="time" class="form-input" value="13:00">
-                        <input type="text" class="form-input" value="Lunch">
+                        <input type="text" class="form-input" value="Lunch Time">
                     </div>
                     <div class="schedule-item">
                         <input type="time" class="form-input" value="13:00">
                         <input type="time" class="form-input" value="17:00">
-                        <input type="text" class="form-input" value="Afternoon">
+                        <input type="text" class="form-input" value="Afternoon Time">
                     </div>
                     <div class="schedule-item">
                         <input type="time" class="form-input" value="17:00">
                         <input type="time" class="form-input" value="19:00">
-                        <input type="text" class="form-input" value="Dinner">
+                        <input type="text" class="form-input" value="Dinner Time">
                     </div>
                     <div class="schedule-item">
                         <input type="time" class="form-input" value="19:00">
                         <input type="time" class="form-input" value="22:00">
-                        <input type="text" class="form-input" value="Evening">
+                        <input type="text" class="form-input" value="Evening Time">
                     </div>
                     <div class="schedule-item">
                         <input type="time" class="form-input" value="22:00">
                         <input type="time" class="form-input" value="06:00">
-                        <input type="text" class="form-input" value="Sleep">
+                        <input type="text" class="form-input" value="Sleep Time">
                     </div>
                 </div>
             </div>
@@ -313,7 +310,7 @@
                 </ol>
                 
                 <p style="margin-top: 2rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem; color: #666;">
-                    <strong>Version:</strong> 2.3 (Special Events Table + New Layout)<br>
+                    <strong>Version:</strong> 2.3 (Special Events Table Interface)<br>
                     <strong>Last Updated:</strong> November 2025
                 </p>
             </div>

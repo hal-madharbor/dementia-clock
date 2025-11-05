@@ -15,14 +15,18 @@
     <!-- Button stack on left side -->
     <div class="button-stack" id="buttonStack">
         <button class="stack-button" id="settingsBtn" title="Settings">⚙️</button>
-        <button class="stack-button" id="infoBtn" title="Caregiver information">ℹ️</button>
+        <button class="stack-button" id="infoBtn" title="Press and hold for caregiver info">ℹ️</button>
         <button class="stack-button" id="caregiverToggle" title="Change caregiver">👤</button>
+        <button class="stack-button medication-btn" id="medicationBtn" title="View medication schedule">💊</button>
     </div>
 
     <!-- Home button (appears on panels) -->
     <button class="home-btn" id="homeBtn" title="Return to clock">🏠</button>
 
     <div class="container" id="clockDisplay">
+        <!-- Special Events Display (shows when events active) -->
+        <div id="specialEvents" style="display: none;"></div>
+        
         <div class="photos-section">
             <div class="photo-card">
                 <div class="photo" id="patientPhoto">I</div>
@@ -45,10 +49,7 @@
                 <span id="day"></span>
             </div>
         </div>
-        <div class="activity" id="activity">
-            <div id="activityLabel"></div>
-            <div class="special-event" id="specialEvent"></div>
-        </div>
+        <div class="activity" id="activity"></div>
     </div>
 
     <div class="caregiver-info-panel" id="caregiverInfoPanel">
@@ -254,22 +255,7 @@
             </div>
             
             <div class="tab-panel" id="events">
-                <h2>Special Events</h2>
-                <p style="margin-bottom: 1.5rem; color: #666;">Add birthdays, anniversaries, and other special occasions. They will appear on the home screen on the actual day.</p>
-                
-                <div class="special-events-list" id="specialEventsList"></div>
-                
-                <button class="btn btn-primary" id="addEventBtn" style="margin-top: 1rem;">+ Add Special Event</button>
-                
-                <div style="margin-top: 2rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem; color: #666;">
-                    <strong>How it works:</strong>
-                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem; line-height: 1.6;">
-                        <li>Events repeat every year automatically</li>
-                        <li>Only one event displays per day (if multiple, first one shows)</li>
-                        <li>Appears below the activity label on the home screen</li>
-                        <li>Shown in gold/amber color to make it special</li>
-                    </ul>
-                </div>
+                <!-- Special events content will be inserted here by special-events-ui.js -->
             </div>
             
             <div class="tab-panel" id="popups">
@@ -323,16 +309,9 @@
                     <li>To restore: Click "📂 Import" and select your backup file</li>
                 </ol>
                 
-                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #1a1a1a;">Troubleshooting</h3>
-                <p style="margin-bottom: 0.5rem; color: #374151;"><strong>Settings won't save:</strong></p>
-                <ul style="margin-left: 2rem; margin-bottom: 1rem; line-height: 1.6; color: #374151;">
-                    <li>Make sure you clicked "Save" button</li>
-                    <li>Check Settings → Safari → Block All Cookies is OFF</li>
-                </ul>
-                
                 <p style="margin-top: 2rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem; color: #666;">
-                    <strong>Version:</strong> 2.1 (Phase 5 Complete + Button Stack)<br>
-                    <strong>Last Updated:</strong> October 2025
+                    <strong>Version:</strong> 2.3 (Special Events Table Interface)<br>
+                    <strong>Last Updated:</strong> November 2025
                 </p>
             </div>
         </div>
@@ -354,8 +333,8 @@
     <script src="js/clock.js"></script>
     <script src="js/caregivers.js"></script>
     <script src="js/medications.js"></script>
-    <script src="js/special-events.js"></script>
     <script src="js/settings-ui.js"></script>
+    <script src="js/special-events-ui.js"></script>
     <script src="js/info-panel.js"></script>
     <script src="js/main.js"></script>
 </body>

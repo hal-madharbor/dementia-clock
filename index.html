@@ -17,6 +17,7 @@
         <button class="stack-button" id="settingsBtn" title="Settings">⚙️</button>
         <button class="stack-button" id="infoBtn" title="Press and hold for caregiver info">ℹ️</button>
         <button class="stack-button" id="caregiverToggle" title="Change caregiver">👤</button>
+        <button class="stack-button" id="flashcardsBtn" title="Memory flashcards">📚</button>
         <button class="stack-button medication-btn" id="medicationBtn" title="View medication schedule">💊</button>
     </div>
 
@@ -56,6 +57,10 @@
         <div id="infoContent"></div>
     </div>
 
+    <div class="flashcards-panel" id="flashcardsPanel">
+        <div id="flashcardsContent"></div>
+    </div>
+
     <div class="settings-panel" id="settingsPanel">
         <div class="settings-header">⚙️ Clock Settings</div>
         
@@ -64,6 +69,7 @@
             <button class="tab" data-tab="schedule">Daily Schedule</button>
             <button class="tab" data-tab="caregivers">Caregivers</button>
             <button class="tab" data-tab="caregiverinfo">Caregiver Info</button>
+            <button class="tab" data-tab="flashcards">Flashcards</button>
             <button class="tab" data-tab="events">Special Events</button>
             <button class="tab" data-tab="popups">Pop-up Tasks</button>
             <button class="tab" data-tab="medications">Medications</button>
@@ -254,6 +260,10 @@
                 </div>
             </div>
             
+            <div class="tab-panel" id="flashcards">
+                <!-- Flashcards content will be inserted here by flashcards-ui.js -->
+            </div>
+            
             <div class="tab-panel" id="events">
                 <!-- Special events content will be inserted here by special-events-ui.js -->
             </div>
@@ -333,6 +343,8 @@
     <script src="js/clock.js"></script>
     <script src="js/caregivers.js"></script>
     <script src="js/medications.js"></script>
+    <script src="js/flashcards.js"></script>
+    <script src="js/flashcards-ui.js"></script>
     <script src="js/settings-ui.js"></script>
     <script src="js/special-events-ui.js"></script>
     <script src="js/info-panel.js"></script>

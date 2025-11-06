@@ -4,7 +4,15 @@
 // Handles flashcard settings interface - categories, cards, photo galleries
 
 function renderFlashcardsTab() {
+    console.log('renderFlashcardsTab called');
     const flashcardsPanel = document.getElementById('flashcards');
+    
+    if (!flashcardsPanel) {
+        console.error('Flashcards panel element not found!');
+        return;
+    }
+    
+    console.log('Flashcards panel found, rendering content...');
     
     flashcardsPanel.innerHTML = `
         <h2>Flashcards & Photo Galleries</h2>
@@ -485,4 +493,7 @@ function addCardToCategory(catIndex) {
 // Export function for use in settings-ui.js
 if (typeof window !== 'undefined') {
     window.renderFlashcardsTab = renderFlashcardsTab;
+    console.log('Flashcards UI module loaded, renderFlashcardsTab defined');
+} else {
+    console.error('Window object not available for flashcards-ui.js export');
 }

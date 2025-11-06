@@ -229,7 +229,12 @@ function initializeSettingsHandlers() {
             
             // Render flashcards tab when activated
             if (tab.dataset.tab === 'flashcards') {
-                renderFlashcardsTab();
+                if (typeof renderFlashcardsTab === 'function') {
+                    renderFlashcardsTab();
+                } else {
+                    console.error('renderFlashcardsTab is not defined');
+                    document.getElementById('flashcards').innerHTML = '<p style="color: red; padding: 2rem;">Error: Flashcards module not loaded. Please refresh the page.</p>';
+                }
             }
         });
     });

@@ -9,14 +9,16 @@ const DEFAULT_SETTINGS = {
     lastName: "Jones",
     displayName: "Ilona",
     photo: null,
+    photoGallery: [],  // Array of { image: base64, caption: "text" }
     primaryCaregiver: {
         name: "Hal",
         displayName: "Hal",
         relationship: "Husband",
         phone: "",
-        photo: null
+        photo: null,
+        photoGallery: []  // Array of { image: base64, caption: "text" }
     },
-    additionalCaregivers: [],
+    additionalCaregivers: [],  // Each will have photoGallery: []
     currentCaregiverIndex: -1,
     schedule: [
         { start: "06:00", end: "09:00", label: "Breakfast Time" },
@@ -58,6 +60,20 @@ const DEFAULT_SETTINGS = {
         ],
         specialOccasions: [
             // { name: "Anniversary", month: 6, day: 14, year: 1975, note: "Wedding day" }
+        ]
+    },
+    flashcards: {
+        displayMode: "single",  // "single" or "grid"
+        rotationInterval: 10,   // seconds
+        autoRotate: true,
+        categories: [
+            // { 
+            //   name: "Kitchen Items", 
+            //   cards: [
+            //     { image: base64, caption: "Spoon" },
+            //     { image: base64, caption: "Fork" }
+            //   ]
+            // }
         ]
     }
 };

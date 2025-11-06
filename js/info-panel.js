@@ -312,12 +312,18 @@ function initializeInfoPanelHandlers() {
     // Home button - closes all panels
     HOME_BTN.addEventListener('click', () => {
         document.getElementById('caregiverInfoPanel').classList.remove('active');
+        document.getElementById('flashcardsPanel').classList.remove('active');
         document.getElementById('settingsPanel').classList.remove('active');
         HOME_BTN.classList.remove('visible');
         
         if (infoAutoCloseTimer) {
             clearTimeout(infoAutoCloseTimer);
             infoAutoCloseTimer = null;
+        }
+        
+        // Stop flashcard rotation if active
+        if (typeof stopFlashcardRotation === 'function') {
+            stopFlashcardRotation();
         }
     });
 }

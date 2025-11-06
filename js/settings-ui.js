@@ -226,6 +226,11 @@ function initializeSettingsHandlers() {
             if (tab.dataset.tab === 'events') {
                 renderSpecialEventsTab();
             }
+            
+            // Render flashcards tab when activated
+            if (tab.dataset.tab === 'flashcards') {
+                renderFlashcardsTab();
+            }
         });
     });
     

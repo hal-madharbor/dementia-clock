@@ -31,6 +31,9 @@ function loadSettings() {
             if (!loaded.photo) {
                 loaded.photo = null;
             }
+            if (!loaded.photoGallery) {
+                loaded.photoGallery = [];
+            }
             if (!loaded.primaryCaregiver) {
                 loaded.primaryCaregiver = {
                     name: loaded.spouseName || "Caregiver",
@@ -49,6 +52,9 @@ function loadSettings() {
             if (!loaded.primaryCaregiver.photo) {
                 loaded.primaryCaregiver.photo = null;
             }
+            if (!loaded.primaryCaregiver.photoGallery) {
+                loaded.primaryCaregiver.photoGallery = [];
+            }
             if (!loaded.additionalCaregivers) {
                 loaded.additionalCaregivers = [];
                 loaded.currentCaregiverIndex = -1;
@@ -57,6 +63,7 @@ function loadSettings() {
                 if (!cg.phone) cg.phone = "";
                 if (!cg.displayName) cg.displayName = cg.name;
                 if (!cg.photo) cg.photo = null;
+                if (!cg.photoGallery) cg.photoGallery = [];
             });
             
             // Migrate old special events format to new format
@@ -137,6 +144,20 @@ function loadSettings() {
             if (!loaded.specialEvents.annualHolidays) loaded.specialEvents.annualHolidays = [];
             if (!loaded.specialEvents.floatingHolidays) loaded.specialEvents.floatingHolidays = [];
             if (!loaded.specialEvents.specialOccasions) loaded.specialEvents.specialOccasions = [];
+            
+            // Ensure flashcards structure exists
+            if (!loaded.flashcards) {
+                loaded.flashcards = {
+                    displayMode: 'single',
+                    rotationInterval: 10,
+                    autoRotate: true,
+                    categories: []
+                };
+            }
+            if (!loaded.flashcards.categories) loaded.flashcards.categories = [];
+            if (loaded.flashcards.displayMode === undefined) loaded.flashcards.displayMode = 'single';
+            if (loaded.flashcards.rotationInterval === undefined) loaded.flashcards.rotationInterval = 10;
+            if (loaded.flashcards.autoRotate === undefined) loaded.flashcards.autoRotate = true;
             
             return loaded;
         }

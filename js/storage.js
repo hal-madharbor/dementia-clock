@@ -196,18 +196,20 @@ function importSettings(file) {
         try {
             const imported = JSON.parse(event.target.result);
             if (confirm('Import settings? This will replace your current settings.')) {
-                settings = imported;
+                // Save imported data to localStorage first
+                localStorage.setItem('dementiaClockSettings', JSON.stringify(imported));
                 
-                // Run through load logic to ensure compatibility
+                // Now load it back (this runs backward compatibility migrations)
                 settings = loadSettings();
                 
-                saveSettings();
+                // Update all UI elements
                 loadSettingsIntoForm();
                 updateClock();
                 updateCaregiverDisplay();
                 alert('Settings imported successfully!');
             }
         } catch (error) {
+            console.error('Import error:', error);
             alert('Error importing. Make sure this is a valid settings file.');
         }
     };

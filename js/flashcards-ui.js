@@ -415,9 +415,6 @@ function attachFlashcardCategoryListeners() {
 }
 
 function addPhotoToGallery(galleryType, cgIndex = null) {
-    const caption = prompt('Enter caption for this photo:');
-    if (!caption || !caption.trim()) return;
-    
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
@@ -428,6 +425,14 @@ function addPhotoToGallery(galleryType, cgIndex = null) {
                 alert('Photo too large. Please use under 2MB.');
                 return;
             }
+            
+            // Ask for caption AFTER file is selected
+            const caption = prompt('Enter caption for this photo:', '');
+            if (!caption || !caption.trim()) {
+                alert('Caption is required.');
+                return;
+            }
+            
             const reader = new FileReader();
             reader.onload = (event) => {
                 const photoData = {
@@ -458,9 +463,6 @@ function addPhotoToGallery(galleryType, cgIndex = null) {
 }
 
 function addCardToCategory(catIndex) {
-    const caption = prompt('Enter caption for this card:');
-    if (!caption || !caption.trim()) return;
-    
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
@@ -471,6 +473,14 @@ function addCardToCategory(catIndex) {
                 alert('Photo too large. Please use under 2MB.');
                 return;
             }
+            
+            // Ask for caption AFTER file is selected
+            const caption = prompt('Enter caption for this card:', '');
+            if (!caption || !caption.trim()) {
+                alert('Caption is required.');
+                return;
+            }
+            
             const reader = new FileReader();
             reader.onload = (event) => {
                 const cardData = {

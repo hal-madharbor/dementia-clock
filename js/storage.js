@@ -10,7 +10,12 @@ function saveSettings() {
         return true;
     } catch (error) {
         console.error('Error saving:', error);
-        alert('Error saving settings.');
+        if (error.name === 'QuotaExceededError') {
+            const usage = getStorageUsage();
+            alert(`Storage Limit Exceeded!\n\nYou've used ${usage.usedMB}MB of available storage.\n\nTo fix this:\n• Remove photos from galleries\n• Delete unused flashcard categories\n• Use fewer/smaller images\n\nThe app will continue working, but changes cannot be saved until you free up space.`);
+        } else {
+            alert('Error saving settings.');
+        }
         return false;
     }
 }
@@ -175,10 +180,9 @@ function resetSettings() {
     updateCaregiverDisplay();
 }
 
-function exportSettings() {
+async function exportSettings() {
     try {
-        const dataStr = JSON.stringify(settings, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
+        const blob = await exportAllData();
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -186,20 +190,21 @@ function exportSettings() {
         link.click();
         URL.revokeObjectURL(url);
     } catch (error) {
+        console.error('Export error:', error);
         alert('Error exporting.');
     }
 }
 
 function importSettings(file) {
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
         try {
             const imported = JSON.parse(event.target.result);
             if (confirm('Import settings? This will replace your current settings.')) {
-                // Save imported data to localStorage first
-                localStorage.setItem('dementiaClockSettings', JSON.stringify(imported));
+                // Import using IndexedDB
+                await importAllData(imported);
                 
-                // Now load it back (this runs backward compatibility migrations)
+                // Reload settings
                 settings = loadSettings();
                 
                 // Update all UI elements

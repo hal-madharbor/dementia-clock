@@ -4,8 +4,11 @@
 // Coordinates initialization of all other modules and starts the application
 
 // Initialize all modules when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    // CRITICAL: Initialize settings FIRST before any other modules use it
+document.addEventListener('DOMContentLoaded', async () => {
+    // CRITICAL: Initialize IndexedDB FIRST
+    await initPhotoDatabase();
+    
+    // Then initialize settings
     settings = loadSettings();
     
     // Now initialize all handlers (they can safely access settings)

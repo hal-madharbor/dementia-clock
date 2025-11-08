@@ -113,7 +113,7 @@ function initializeFlashcardSettingsTabs() {
     });
 }
 
-function renderPatientGallery() {
+async function renderPatientGallery() {
     const container = document.getElementById('patientGalleryList');
     container.innerHTML = '';
     
@@ -122,18 +122,24 @@ function renderPatientGallery() {
         return;
     }
     
-    settings.photoGallery.forEach((photo, index) => {
+    for (let index = 0; index < settings.photoGallery.length; index++) {
+        const photoRef = settings.photoGallery[index];
         const item = document.createElement('div');
         item.className = 'flashcard-gallery-item';
+        
+        // Load photo from IndexedDB
+        const photo = await getPhoto(photoRef.id);
+        const imageData = photo ? photo.base64 : '';
+        
         item.innerHTML = `
-            <img src="${photo.image}" class="flashcard-gallery-thumb" alt="${photo.caption}">
+            <img src="${imageData}" class="flashcard-gallery-thumb" alt="${photoRef.caption}">
             <div style="flex: 1;">
-                <input type="text" class="form-input gallery-caption-input" data-gallery="patient" data-index="${index}" value="${photo.caption}" placeholder="Caption" style="margin: 0;">
+                <input type="text" class="form-input gallery-caption-input" data-gallery="patient" data-index="${index}" value="${photoRef.caption}" placeholder="Caption" style="margin: 0;">
             </div>
             <button class="btn btn-danger gallery-remove-btn" data-gallery="patient" data-index="${index}">✕</button>
         `;
         container.appendChild(item);
-    });
+    }
     
     attachGalleryEventListeners();
 }
@@ -311,7 +317,7 @@ function attachFlashcardSettingsListeners() {
 function attachGalleryEventListeners() {
     // Caption changes
     document.querySelectorAll('.gallery-caption-input').forEach(input => {
-        input.addEventListener('blur', (e) => {
+        input.addEventListener('blur', async (e) => {
             const gallery = e.target.dataset.gallery;
             const index = parseInt(e.target.dataset.index);
             const caption = e.target.value.trim();
@@ -319,15 +325,31 @@ function attachGalleryEventListeners() {
             if (gallery === 'patient') {
                 if (settings.photoGallery[index]) {
                     settings.photoGallery[index].caption = caption;
+                    // Update caption in IndexedDB
+                    const photoId = settings.photoGallery[index].id;
+                    const photo = await getPhoto(photoId);
+                    if (photo) {
+                        await savePhoto(photoId, photo.base64, caption);
+                    }
                 }
             } else if (gallery === 'primaryCaregiver') {
                 if (settings.primaryCaregiver.photoGallery[index]) {
                     settings.primaryCaregiver.photoGallery[index].caption = caption;
+                    const photoId = settings.primaryCaregiver.photoGallery[index].id;
+                    const photo = await getPhoto(photoId);
+                    if (photo) {
+                        await savePhoto(photoId, photo.base64, caption);
+                    }
                 }
             } else if (gallery === 'additionalCaregiver') {
                 const cgIndex = parseInt(e.target.dataset.cgIndex);
                 if (settings.additionalCaregivers[cgIndex] && settings.additionalCaregivers[cgIndex].photoGallery[index]) {
                     settings.additionalCaregivers[cgIndex].photoGallery[index].caption = caption;
+                    const photoId = settings.additionalCaregivers[cgIndex].photoGallery[index].id;
+                    const photo = await getPhoto(photoId);
+                    if (photo) {
+                        await savePhoto(photoId, photo.base64, caption);
+                    }
                 }
             }
         });
@@ -335,20 +357,26 @@ function attachGalleryEventListeners() {
     
     // Remove buttons
     document.querySelectorAll('.gallery-remove-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             if (!confirm('Remove this photo from gallery?')) return;
             
             const gallery = e.target.dataset.gallery;
             const index = parseInt(e.target.dataset.index);
             
             if (gallery === 'patient') {
+                const photoId = settings.photoGallery[index].id;
+                await deletePhoto(photoId);
                 settings.photoGallery.splice(index, 1);
                 renderPatientGallery();
             } else if (gallery === 'primaryCaregiver') {
+                const photoId = settings.primaryCaregiver.photoGallery[index].id;
+                await deletePhoto(photoId);
                 settings.primaryCaregiver.photoGallery.splice(index, 1);
                 renderCaregiverGalleries();
             } else if (gallery === 'additionalCaregiver') {
                 const cgIndex = parseInt(e.target.dataset.cgIndex);
+                const photoId = settings.additionalCaregivers[cgIndex].photoGallery[index].id;
+                await deletePhoto(photoId);
                 settings.additionalCaregivers[cgIndex].photoGallery.splice(index, 1);
                 renderCaregiverGalleries();
             }
@@ -414,15 +442,15 @@ function attachFlashcardCategoryListeners() {
     });
 }
 
-function addPhotoToGallery(galleryType, cgIndex = null) {
+async function addPhotoToGallery(galleryType, cgIndex = null) {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
         const file = e.target.files[0];
         if (file) {
-            if (file.size > 2 * 1024 * 1024) {
-                alert('Photo too large. Please use under 2MB.');
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Photo too large. Please use under 5MB.');
                 return;
             }
             
@@ -433,30 +461,41 @@ function addPhotoToGallery(galleryType, cgIndex = null) {
                 return;
             }
             
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const photoData = {
-                    image: event.target.result,
-                    caption: caption.trim()
-                };
+            try {
+                // Compress image
+                const compressedImage = await compressImage(file, 800, 800, 0.7);
+                
+                // Generate unique ID
+                const photoId = generatePhotoId(galleryType, Date.now());
+                
+                // Save to IndexedDB
+                await savePhoto(photoId, compressedImage, caption.trim());
+                
+                // Add reference to settings
+                const photoRef = { id: photoId, caption: caption.trim() };
                 
                 if (galleryType === 'patient') {
                     if (!settings.photoGallery) settings.photoGallery = [];
-                    settings.photoGallery.push(photoData);
+                    settings.photoGallery.push(photoRef);
                     renderPatientGallery();
                 } else if (galleryType === 'primaryCaregiver') {
                     if (!settings.primaryCaregiver.photoGallery) settings.primaryCaregiver.photoGallery = [];
-                    settings.primaryCaregiver.photoGallery.push(photoData);
+                    settings.primaryCaregiver.photoGallery.push(photoRef);
                     renderCaregiverGalleries();
                 } else if (galleryType === 'additionalCaregiver') {
                     if (!settings.additionalCaregivers[cgIndex].photoGallery) {
                         settings.additionalCaregivers[cgIndex].photoGallery = [];
                     }
-                    settings.additionalCaregivers[cgIndex].photoGallery.push(photoData);
+                    settings.additionalCaregivers[cgIndex].photoGallery.push(photoRef);
                     renderCaregiverGalleries();
                 }
-            };
-            reader.readAsDataURL(file);
+                
+                console.log(`Photo saved to IndexedDB: ${photoId}`);
+                
+            } catch (error) {
+                console.error('Error saving photo:', error);
+                alert('Error processing image. Please try a different photo.');
+            }
         }
     };
     input.click();
@@ -466,11 +505,11 @@ function addCardToCategory(catIndex) {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
         const file = e.target.files[0];
         if (file) {
-            if (file.size > 2 * 1024 * 1024) {
-                alert('Photo too large. Please use under 2MB.');
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Photo too large. Please use under 5MB.');
                 return;
             }
             
@@ -481,10 +520,19 @@ function addCardToCategory(catIndex) {
                 return;
             }
             
-            const reader = new FileReader();
-            reader.onload = (event) => {
+            try {
+                // Compress image before storing
+                const compressedImage = await compressImage(file, 800, 800, 0.7);
+                
+                // Check storage space
+                const estimatedSize = compressedImage.length / 1024; // KB
+                if (!hasStorageSpace(estimatedSize)) {
+                    showStorageWarning();
+                    return;
+                }
+                
                 const cardData = {
-                    image: event.target.result,
+                    image: compressedImage,
                     caption: caption.trim()
                 };
                 
@@ -493,6 +541,19 @@ function addCardToCategory(catIndex) {
                 }
                 settings.flashcards.categories[catIndex].cards.push(cardData);
                 renderFlashcardCategories();
+                
+                // Show storage usage
+                const usage = getStorageUsage();
+                console.log(`Storage usage: ${usage.usedMB}MB (${usage.percentUsed}%)`);
+                
+            } catch (error) {
+                console.error('Error compressing image:', error);
+                alert('Error processing image. Please try a different photo.');
+            }
+        }
+    };
+    input.click();
+}
             };
             reader.readAsDataURL(file);
         }

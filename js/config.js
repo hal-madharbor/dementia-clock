@@ -9,14 +9,14 @@ const DEFAULT_SETTINGS = {
     lastName: "Jones",
     displayName: "Ilona",
     photo: null,
-    photoGallery: [],  // Array of { image: base64, caption: "text" }
+    photoGallery: [],  // Array of { id: "photoId", caption: "text" } - actual images in IndexedDB
     primaryCaregiver: {
         name: "Hal",
         displayName: "Hal",
         relationship: "Husband",
         phone: "",
         photo: null,
-        photoGallery: []  // Array of { image: base64, caption: "text" }
+        photoGallery: []  // Array of { id: "photoId", caption: "text" }
     },
     additionalCaregivers: [],  // Each will have photoGallery: []
     currentCaregiverIndex: -1,

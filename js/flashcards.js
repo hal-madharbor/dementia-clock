@@ -12,55 +12,93 @@ let flashcardState = {
     source: null  // 'patient', 'primaryCaregiver', 'caregiver-N', 'category-N', or null
 };
 
-function getAllFlashcardSources() {
+async function getAllFlashcardSources() {
     const sources = [];
     
     // Patient gallery
     if (settings.photoGallery && settings.photoGallery.length > 0) {
-        sources.push({
-            type: 'patient',
-            name: settings.displayName,
-            cards: settings.photoGallery
-        });
+        const cards = [];
+        for (const photoRef of settings.photoGallery) {
+            const photo = await getPhoto(photoRef.id);
+            if (photo) {
+                cards.push({ image: photo.base64, caption: photoRef.caption });
+            }
+        }
+        if (cards.length > 0) {
+            sources.push({
+                type: 'patient',
+                name: settings.displayName,
+                cards: cards
+            });
+        }
     }
     
     // Primary caregiver gallery
     if (settings.primaryCaregiver.photoGallery && settings.primaryCaregiver.photoGallery.length > 0) {
-        sources.push({
-            type: 'primaryCaregiver',
-            name: settings.primaryCaregiver.displayName,
-            relationship: settings.primaryCaregiver.relationship,
-            cards: settings.primaryCaregiver.photoGallery
-        });
+        const cards = [];
+        for (const photoRef of settings.primaryCaregiver.photoGallery) {
+            const photo = await getPhoto(photoRef.id);
+            if (photo) {
+                cards.push({ image: photo.base64, caption: photoRef.caption });
+            }
+        }
+        if (cards.length > 0) {
+            sources.push({
+                type: 'primaryCaregiver',
+                name: settings.primaryCaregiver.displayName,
+                relationship: settings.primaryCaregiver.relationship,
+                cards: cards
+            });
+        }
     }
     
     // Additional caregivers
     if (settings.additionalCaregivers) {
-        settings.additionalCaregivers.forEach((caregiver, index) => {
+        for (let index = 0; index < settings.additionalCaregivers.length; index++) {
+            const caregiver = settings.additionalCaregivers[index];
             if (caregiver.photoGallery && caregiver.photoGallery.length > 0) {
-                sources.push({
-                    type: 'caregiver',
-                    index: index,
-                    name: caregiver.displayName || caregiver.name,
-                    relationship: caregiver.relationship,
-                    cards: caregiver.photoGallery
-                });
+                const cards = [];
+                for (const photoRef of caregiver.photoGallery) {
+                    const photo = await getPhoto(photoRef.id);
+                    if (photo) {
+                        cards.push({ image: photo.base64, caption: photoRef.caption });
+                    }
+                }
+                if (cards.length > 0) {
+                    sources.push({
+                        type: 'caregiver',
+                        index: index,
+                        name: caregiver.displayName || caregiver.name,
+                        relationship: caregiver.relationship,
+                        cards: cards
+                    });
+                }
             }
-        });
+        }
     }
     
     // Custom categories
     if (settings.flashcards && settings.flashcards.categories) {
-        settings.flashcards.categories.forEach((category, index) => {
+        for (let index = 0; index < settings.flashcards.categories.length; index++) {
+            const category = settings.flashcards.categories[index];
             if (category.cards && category.cards.length > 0) {
-                sources.push({
-                    type: 'category',
-                    index: index,
-                    name: category.name,
-                    cards: category.cards
-                });
+                const cards = [];
+                for (const cardRef of category.cards) {
+                    const photo = await getPhoto(cardRef.id);
+                    if (photo) {
+                        cards.push({ image: photo.base64, caption: cardRef.caption });
+                    }
+                }
+                if (cards.length > 0) {
+                    sources.push({
+                        type: 'category',
+                        index: index,
+                        name: category.name,
+                        cards: cards
+                    });
+                }
             }
-        });
+        }
     }
     
     return sources;
@@ -96,8 +134,8 @@ function closeFlashcards() {
     flashcardState.source = null;
 }
 
-function renderFlashcards() {
-    const sources = getAllFlashcardSources();
+async function renderFlashcards() {
+    const sources = await getAllFlashcardSources();
     
     if (sources.length === 0) {
         renderEmptyFlashcards();

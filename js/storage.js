@@ -164,6 +164,30 @@ function loadSettings() {
             if (loaded.flashcards.rotationInterval === undefined) loaded.flashcards.rotationInterval = 10;
             if (loaded.flashcards.autoRotate === undefined) loaded.flashcards.autoRotate = true;
             
+            // Clear old photo gallery data (now using IndexedDB with IDs)
+            if (loaded.photoGallery && loaded.photoGallery.some(item => item.image && !item.id)) {
+                console.log('Clearing old photo format from patient gallery');
+                loaded.photoGallery = [];
+            }
+            if (loaded.primaryCaregiver.photoGallery && loaded.primaryCaregiver.photoGallery.some(item => item.image && !item.id)) {
+                console.log('Clearing old photo format from primary caregiver');
+                loaded.primaryCaregiver.photoGallery = [];
+            }
+            loaded.additionalCaregivers.forEach((cg, idx) => {
+                if (cg.photoGallery && cg.photoGallery.some(item => item.image && !item.id)) {
+                    console.log('Clearing old photo format from caregiver', idx);
+                    cg.photoGallery = [];
+                }
+            });
+            if (loaded.flashcards.categories) {
+                loaded.flashcards.categories.forEach((cat, idx) => {
+                    if (cat.cards && cat.cards.some(item => item.image && !item.id)) {
+                        console.log('Clearing old photo format from category', idx);
+                        cat.cards = [];
+                    }
+                });
+            }
+            
             return loaded;
         }
     } catch (error) {

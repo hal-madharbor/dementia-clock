@@ -124,6 +124,13 @@ async function renderPatientGallery() {
     
     for (let index = 0; index < settings.photoGallery.length; index++) {
         const photoRef = settings.photoGallery[index];
+        
+        // Skip if no ID (old format data)
+        if (!photoRef.id) {
+            console.warn('Skipping photo without ID at index', index);
+            continue;
+        }
+        
         const item = document.createElement('div');
         item.className = 'flashcard-gallery-item';
         
@@ -550,6 +557,12 @@ function addCardToCategory(catIndex) {
                 console.error('Error compressing image:', error);
                 alert('Error processing image. Please try a different photo.');
             }
+        }
+    };
+    input.click();
+}
+            };
+            reader.readAsDataURL(file);
         }
     };
     input.click();

@@ -55,11 +55,13 @@ function savePhoto(id, base64, caption) {
  * @returns {Promise<Object>} - Photo data
  */
 function getPhoto(id) {
-    if (!id) {
-        console.error('getPhoto called without an id');
-        return Promise.reject(new Error('No photo ID provided'));
-    }
     return new Promise((resolve, reject) => {
+        if (!id) {
+            console.warn('getPhoto called without an id');
+            resolve(null);
+            return;
+        }
+        
         const transaction = db.transaction([STORE_NAME], 'readonly');
         const store = transaction.objectStore(STORE_NAME);
         const request = store.get(id);

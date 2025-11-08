@@ -554,7 +554,7 @@ function addCardToCategory(catIndex) {
     };
     input.click();
 }
-            
+            };
             reader.readAsDataURL(file);
         }
     };

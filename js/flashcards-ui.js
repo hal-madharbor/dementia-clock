@@ -554,12 +554,6 @@ function addCardToCategory(catIndex) {
     };
     input.click();
 }
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-    input.click();
-}
 
 // Export function for use in settings-ui.js
 if (typeof window !== 'undefined') {
